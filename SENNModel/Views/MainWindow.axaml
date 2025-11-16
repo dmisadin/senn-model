@@ -1,0 +1,126 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:vm="clr-namespace:SENNModel.ViewModels"
+        mc:Ignorable="d"
+        x:Class="SENNModel.Views.MainWindow"
+        x:DataType="vm:MainWindowViewModel"
+        Width="1000"
+        Height="800"
+        Title="SENN Model">
+
+    <ScrollViewer>
+        <Grid ColumnDefinitions="2*, 3*" RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,
+                      Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,
+                      Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,
+                      Auto" Margin="20" RowSpacing="8" ColumnSpacing="12">
+
+            <!-- Auto-generate 30 inputs -->
+            <!-- Label + TextBox per row -->
+            <!-- Rows 0–29 (30 rows) -->
+
+            <TextBlock Grid.Row="0"  Grid.Column="0" Text="Field 1:"  />
+            <TextBox   Grid.Row="0"  Grid.Column="1" Text="{Binding Field1}" />
+
+            <TextBlock Grid.Row="1"  Grid.Column="0" Text="Field 2:"  />
+            <TextBox   Grid.Row="1"  Grid.Column="1" Text="{Binding Field2}" />
+
+            <TextBlock Grid.Row="2"  Grid.Column="0" Text="Field 3:" />
+            <TextBox   Grid.Row="2"  Grid.Column="1" Text="{Binding Field3}" />
+
+            <TextBlock Grid.Row="3"  Grid.Column="0" Text="Field 4:" />
+            <TextBox   Grid.Row="3"  Grid.Column="1" Text="{Binding Field4}" />
+
+            <TextBlock Grid.Row="4"  Grid.Column="0" Text="Field 5:" />
+            <TextBox   Grid.Row="4"  Grid.Column="1" Text="{Binding Field5}" />
+
+            <TextBlock Grid.Row="5"  Grid.Column="0" Text="Field 6:" />
+            <TextBox   Grid.Row="5"  Grid.Column="1" Text="{Binding Field6}" />
+
+            <TextBlock Grid.Row="6"  Grid.Column="0" Text="Field 7:" />
+            <TextBox   Grid.Row="6"  Grid.Column="1" Text="{Binding Field7}" />
+
+            <TextBlock Grid.Row="7"  Grid.Column="0" Text="Field 8:" />
+            <TextBox   Grid.Row="7"  Grid.Column="1" Text="{Binding Field8}" />
+
+            <TextBlock Grid.Row="8"  Grid.Column="0" Text="Field 9:" />
+            <TextBox   Grid.Row="8"  Grid.Column="1" Text="{Binding Field9}" />
+
+            <TextBlock Grid.Row="9"  Grid.Column="0" Text="Field 10:" />
+            <TextBox   Grid.Row="9"  Grid.Column="1" Text="{Binding Field10}" />
+
+            <TextBlock Grid.Row="10" Grid.Column="0" Text="Field 11:" />
+            <TextBox   Grid.Row="10" Grid.Column="1" Text="{Binding Field11}" />
+
+            <TextBlock Grid.Row="11" Grid.Column="0" Text="Field 12:" />
+            <TextBox   Grid.Row="11" Grid.Column="1" Text="{Binding Field12}" />
+
+            <TextBlock Grid.Row="12" Grid.Column="0" Text="Field 13:" />
+            <TextBox   Grid.Row="12" Grid.Column="1" Text="{Binding Field13}" />
+
+            <TextBlock Grid.Row="13" Grid.Column="0" Text="Field 14:" />
+            <TextBox   Grid.Row="13" Grid.Column="1" Text="{Binding Field14}" />
+
+            <TextBlock Grid.Row="14" Grid.Column="0" Text="Field 15:" />
+            <TextBox   Grid.Row="14" Grid.Column="1" Text="{Binding Field15}" />
+
+            <TextBlock Grid.Row="15" Grid.Column="0" Text="Field 16:" />
+            <TextBox   Grid.Row="15" Grid.Column="1" Text="{Binding Field16}" />
+
+            <TextBlock Grid.Row="16" Grid.Column="0" Text="Field 17:" />
+            <TextBox   Grid.Row="16" Grid.Column="1" Text="{Binding Field17}" />
+
+            <TextBlock Grid.Row="17" Grid.Column="0" Text="Field 18:" />
+            <TextBox   Grid.Row="17" Grid.Column="1" Text="{Binding Field18}" />
+
+            <TextBlock Grid.Row="18" Grid.Column="0" Text="Field 19:" />
+            <TextBox   Grid.Row="18" Grid.Column="1" Text="{Binding Field19}" />
+
+            <TextBlock Grid.Row="19" Grid.Column="0" Text="Field 20:" />
+            <TextBox   Grid.Row="19" Grid.Column="1" Text="{Binding Field20}" />
+
+            <TextBlock Grid.Row="20" Grid.Column="0" Text="Field 21:" />
+            <TextBox   Grid.Row="20" Grid.Column="1" Text="{Binding Field21}" />
+
+            <TextBlock Grid.Row="21" Grid.Column="0" Text="Field 22:" />
+            <TextBox   Grid.Row="21" Grid.Column="1" Text="{Binding Field22}" />
+
+            <TextBlock Grid.Row="22" Grid.Column="0" Text="Field 23:" />
+            <TextBox   Grid.Row="22" Grid.Column="1" Text="{Binding Field23}" />
+
+            <TextBlock Grid.Row="23" Grid.Column="0" Text="Field 24:" />
+            <TextBox   Grid.Row="23" Grid.Column="1" Text="{Binding Field24}" />
+
+            <TextBlock Grid.Row="24" Grid.Column="0" Text="Field 25:" />
+            <TextBox   Grid.Row="24" Grid.Column="1" Text="{Binding Field25}" />
+
+            <TextBlock Grid.Row="25" Grid.Column="0" Text="Field 26:" />
+            <TextBox   Grid.Row="25" Grid.Column="1" Text="{Binding Field26}" />
+
+            <TextBlock Grid.Row="26" Grid.Column="0" Text="Field 27:" />
+            <TextBox   Grid.Row="26" Grid.Column="1" Text="{Binding Field27}" />
+
+            <TextBlock Grid.Row="27" Grid.Column="0" Text="Field 28:" />
+            <TextBox   Grid.Row="27" Grid.Column="1" Text="{Binding Field28}" />
+
+            <TextBlock Grid.Row="28" Grid.Column="0" Text="Field 29:" />
+            <TextBox   Grid.Row="28" Grid.Column="1" Text="{Binding Field29}" />
+
+            <TextBlock Grid.Row="29" Grid.Column="0" Text="Field 30:" />
+            <TextBox   Grid.Row="29" Grid.Column="1" Text="{Binding Field30}" />
+
+
+            <!-- Console Output -->
+            <TextBlock Grid.Row="30" Grid.Column="0" Text="Output:" Margin="0,20,0,0"/>
+            <TextBox Grid.Row="30" Grid.Column="1"
+                     Text="{Binding ConsoleOutput}"
+                     AcceptsReturn="True"
+                     IsReadOnly="True"
+                     Height="200"
+                     ScrollViewer.VerticalScrollBarVisibility="Auto" 
+                     Margin="0,20,0,0"/>
+        </Grid>
+    </ScrollViewer>
+
+</Window>
