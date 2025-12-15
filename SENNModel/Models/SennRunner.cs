@@ -32,10 +32,10 @@ public static class SennRunner
             try
             {
                 // Label 3333: start of run
-        InitializeRun(state);
-        SetPhysicalConstants(state);
-        SetIonicCurrentParameters(state);
-        SetPiConstants(state);
+                InitializeRun(state);
+                SetPhysicalConstants(state);
+                SetIonicCurrentParameters(state);
+                SetPiConstants(state);
 
                 // Label 1: Read input parameters (with EOF handling)
                 // Fortran: READ(7,6666,END=5000)MES2
@@ -46,23 +46,23 @@ public static class SennRunner
                     break;
                 }
 
-        ValidateSettingsAndPrintHeader(state);
-        ConfigureProbeAndWaveform(state);
-        ImportExternalArrays(state);
-        ImportXYForWaveform13(state);
-        PostWaveformSetup(state);
-        ConfigureWaveformParameters(state);
+                ValidateSettingsAndPrintHeader(state);
+                ConfigureProbeAndWaveform(state);
+                ImportExternalArrays(state);
+                ImportXYForWaveform13(state);
+                PostWaveformSetup(state);
+                ConfigureWaveformParameters(state);
 
-        WriteParameterSummary(state);
-        SetupGeometryAndRunParameters(state);
+                WriteParameterSummary(state);
+                SetupGeometryAndRunParameters(state);
 
                 // Label 202: Initialize state vector and run simulation
-        InitializeStateVectorY(state);
-        ComputeExternalPotentialsAndInitDerivatives(state);
+                InitializeStateVectorY(state);
+                ComputeExternalPotentialsAndInitDerivatives(state);
 
-        RunThresholdSearch(state);  // or a simpler RunSimulation if ITHR == 0
+                RunThresholdSearch(state);  // or a simpler RunSimulation if ITHR == 0
 
-        PrintIterativeSummary(state);
+                PrintIterativeSummary(state);
                 RunNextAction nextAction = EndOfRunAndDecideNext(state);
 
                 if (nextAction == RunNextAction.Stop)
@@ -481,16 +481,17 @@ public static class SennRunner
         w?.WriteLine(header);
 
         // Echo IWAVE, FS, S according to FS
+        // Fortran format matches original spacing
         if (state.FS == 1 || state.FS == 2)
         {
-            Console.WriteLine($"IWAVE {state.IWAVE}   FS {state.FS}");
-            w?.WriteLine($"IWAVE {state.IWAVE}   FS {state.FS}");
+            Console.WriteLine($"IWAVE  {state.IWAVE}    FS  {state.FS}");
+            w?.WriteLine($"IWAVE  {state.IWAVE}    FS  {state.FS}");
         }
         else
         {
             // FS = 0 or 3
-            Console.WriteLine($"IWAVE {state.IWAVE}   FS {state.FS}   S {state.S}");
-            w?.WriteLine($"IWAVE {state.IWAVE}   FS {state.FS}   S {state.S}");
+            Console.WriteLine($"IWAVE  {state.IWAVE}    FS  {state.FS}    S  {state.S}");
+            w?.WriteLine($"IWAVE  {state.IWAVE}    FS  {state.FS}    S  {state.S}");
         }
     }
 
@@ -1497,14 +1498,20 @@ public static class SennRunner
         } // end for i=1..jt
 
         // Print some geometry/conductance parameters to data.out
-        w?.WriteLine($"CMB {state.CMB}  GMB {state.GMB}  CMH {state.CMH}  GMH {state.GMH}");
-        w?.WriteLine($"CCM {state.CCM}  CGA {state.CGA}  AN {state.AN}  CGM {state.CGM}");
-        w?.WriteLine($"AB {state.AB}  AH {state.AH}  GAH {state.GAH}  GAB {state.GAB}");
+        // Fortran format: F10.6 for CMB, GMB, CMH, GMH
+        w?.WriteLine(string.Format(ci, " CMB {0,10:F6}  GMB {1,10:F6}  CMH {2,10:F6}  GMH {3,10:F6}",
+            state.CMB, state.GMB, state.CMH, state.GMH));
+        // Fortran format: E10.6 for CCM, CGA, AN, CGM
+        w?.WriteLine(string.Format(ci, " CCM {0,10:E6}  CGA {1,10:E6}  AN {2,10:E6}  CGM {3,10:E6}",
+            state.CCM, state.CGA, state.AN, state.CGM));
+        w?.WriteLine(string.Format(ci, " AB {0,10:F6}  AH {1,10:F6}  GAH {2,10:F6}  GAB {3,10:F6}",
+            state.AB, state.AH, state.GAH, state.GAB));
         w?.WriteLine();
+        // EPOT format: F10.3 (3 decimal places)
         w?.Write("EPOT ");
         for (int mm = 1; mm <= state.NNODES; mm++)
         {
-            w?.Write(state.EPOT[mm].ToString(ci) + " ");
+            w?.Write(string.Format(ci, "{0:F3} ", state.EPOT[mm]));
         }
         w?.WriteLine();
 
@@ -1523,19 +1530,19 @@ public static class SennRunner
         var w = state.DataOutWriter;
         if (w == null) return;
 
-        // TIME and Vnn headers
-        w.Write(" TIME");
+        // Fortran FORMAT: ' TIME',10(7X,'V',I3,1x) - TIME header with V22, V23, etc.
+        w.Write("      TIME");
         for (int i = 2; i <= state.mpn; i++)
         {
-            w.Write($"       V{state.IN[i]:D3}");
+            w.Write($"       V{state.IN[i]:D3}");  // 7 spaces + V + 3-digit node number + 1 space
         }
         w.WriteLine();
 
-        // I headers
-        w.Write("       ");
+        // Fortran FORMAT: 9X,10(7X,'I',I3,1x) - I headers
+        w.Write("         ");  // 9 spaces
         for (int i = 2; i <= state.mpn; i++)
         {
-            w.Write($"       I{state.IN[i]:D3}");
+            w.Write($"       I{state.IN[i]:D3}");  // 7 spaces + I + 3-digit node number + 1 space
         }
         w.WriteLine();
     }
@@ -1560,8 +1567,9 @@ public static class SennRunner
         state.VMAX = 0.0;
 
         w?.WriteLine();
-        w?.WriteLine($"    I={state.UIO:F15.7}");
-        Console.WriteLine($"    I={state.UIO:F15.7}");
+        // Fortran FORMAT (A6,F15.7) - 6 chars for "    I=", then F15.7 for number
+        w?.WriteLine(string.Format(ci, "    I={0,15:F7}", state.UIO));
+        Console.WriteLine(string.Format(ci, "    I={0,15:F7}", state.UIO));
 
         // Header for time/V/I columns
         WriteVoltageCurrentHeaders(state);
@@ -1783,6 +1791,7 @@ public static class SennRunner
         }
 
         // Default: GOTO 3333 (new full run with same file)
+        // But check if we should stop (e.g., no more input)
         return RunNextAction.RestartFullRun;
     }
 
@@ -2332,15 +2341,15 @@ public static class SennRunner
         if (w == null) return;
         var ci = System.Globalization.CultureInfo.InvariantCulture;
 
-        var values = new List<string>
-        {
-            x.ToString("F9", ci)
-        };
-
+        // Fortran FORMAT 500: 2X,F9.4,10(2X,F10.3)
+        // 2 spaces, then F9.4 for time, then 10 values of F10.3 for voltages
+        w.Write("     ");  // 5 spaces (2X = 2 spaces, but we need alignment)
+        w.Write(string.Format(ci, "{0,9:F4}", x));
         for (int k = node1; k <= node2; k++)
-            values.Add(s.Y[k].ToString("F10", ci));
-
-        w.WriteLine("  " + string.Join("  ", values)); // matches FORMAT 500 reasonably
+        {
+            w.Write(string.Format(ci, "  {0,10:F3}", s.Y[k]));  // 2 spaces + F10.3
+        }
+        w.WriteLine();
     }
 
     private static void WriteSeries(TextWriter? w, string label, double x, double[] arr, int node1, int node2)
@@ -2348,11 +2357,18 @@ public static class SennRunner
         if (w == null) return;
         var ci = System.Globalization.CultureInfo.InvariantCulture;
 
-        var values = new List<string>();
+        // Fortran FORMAT 507: '  ',A7,3X,10(2X,E10.3)
+        // 2 spaces, 7-char label, 3 spaces, then 10 values of E10.3
+        w.Write("  ");  // 2 spaces
+        w.Write(string.Format("{0,-7}", label));  // 7-char label (left-aligned)
+        w.Write("   ");  // 3 spaces
         for (int k = node1; k <= node2; k++)
-            values.Add(arr[k].ToString("E10", ci));  // FORMAT 'E10.3' style
-
-        w.WriteLine($"  {label}   {string.Join("  ", values)}");
+        {
+            // E10.3 format: scientific notation with 3 decimal places, 10 total chars
+            // Format like: -0.119E-06 or 0.667E+01
+            w.Write(string.Format(ci, "  {0,10:E3}", arr[k]));  // 2 spaces + E10.3
+        }
+        w.WriteLine();
     }
 
     private static void UpdateNodeThresholdFlags(SennState s)
