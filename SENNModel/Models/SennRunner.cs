@@ -25,12 +25,26 @@ public static class SennRunner
         // => open existing file for reading
         state.InParamReader = new StreamReader("inparam.txt");
 
+        // Main loop: corresponds to label 3333 (start of run)
+        // Fortran: GOTO 3333 can restart from the beginning
+        while (true)
+        {
+            try
+            {
+                // Label 3333: start of run
         InitializeRun(state);
         SetPhysicalConstants(state);
         SetIonicCurrentParameters(state);
         SetPiConstants(state);
 
-        ReadInputParameters(state);
+                // Label 1: Read input parameters (with EOF handling)
+                // Fortran: READ(7,6666,END=5000)MES2
+                if (!ReadInputParameters(state))
+                {
+                    // EOF reached (label 5000)
+                    Console.WriteLine("HIT EOF ON INPUT");
+                    break;
+                }
 
         ValidateSettingsAndPrintHeader(state);
         ConfigureProbeAndWaveform(state);
@@ -41,21 +55,45 @@ public static class SennRunner
 
         WriteParameterSummary(state);
         SetupGeometryAndRunParameters(state);
+
+                // Label 202: Initialize state vector and run simulation
         InitializeStateVectorY(state);
         ComputeExternalPotentialsAndInitDerivatives(state);
 
         RunThresholdSearch(state);  // or a simpler RunSimulation if ITHR == 0
 
         PrintIterativeSummary(state);
-        EndOfRunAndDecideNext(state);
+                RunNextAction nextAction = EndOfRunAndDecideNext(state);
 
-
-        // TODO: here will go the rest of the translated algorithm
-        //       (reading namelists, main time loop, etc.)
+                if (nextAction == RunNextAction.Stop)
+                {
+                    break;
+                }
+                else if (nextAction == RunNextAction.RestartIntegration)
+                {
+                    // GOTO 202: re-initialize Y and restart integration
+                    // This is already handled by the loop, but we need to skip re-reading input
+                    continue;
+                }
+                else if (nextAction == RunNextAction.RestartFullRun)
+                {
+                    // GOTO 3333: restart from beginning (read new input)
+                    continue;
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error during run: {ex.Message}");
+                Console.WriteLine(ex.StackTrace);
+                break;
+            }
+        }
 
         // Clean up
         state.DataOutWriter?.Dispose();
         state.InParamReader?.Dispose();
+        state.Out17?.Dispose();
+        state.Out30?.Dispose();
     }
 
     private static void InitializeRun(SennState state)
@@ -171,7 +209,7 @@ public static class SennRunner
 
 
 
-    public static void ReadInputParameters(SennState state)
+    public static bool ReadInputParameters(SennState state)
     {
         var reader = state.InParamReader
                      ?? throw new InvalidOperationException("InParamReader is not initialized.");
@@ -183,19 +221,22 @@ public static class SennRunner
         // Use invariant culture for parsing doubles with '.' decimal
         var ci = CultureInfo.InvariantCulture;
 
+        // Fortran: READ(7,6666,END=5000)MES2
+        // Read the descriptor line (20A4 format = 80 characters, stored in MES2 array)
+        line = reader.ReadLine();
+        if (line == null)
+        {
+            return false; // EOF reached (label 5000)
+        }
+        // Store descriptor (first line is the run descriptor)
+        state.Descriptor = line.Trim();
+        headerRead = true;
+
         while ((line = reader.ReadLine()) != null)
         {
             line = line.Trim();
             if (string.IsNullOrEmpty(line))
                 continue;
-
-            // First non-empty, non-& line is the header (e.g. "SINUSOID")
-            if (!headerRead && !line.StartsWith("&"))
-            {
-                state.Descriptor = line.Trim();
-                headerRead = true;
-                continue;
-            }
 
             // Section markers: &FIBER, &STIMULUS, &CONTROL, &END
             if (line.StartsWith("&", StringComparison.OrdinalIgnoreCase))
@@ -253,6 +294,8 @@ public static class SennRunner
                 }
             }
         }
+
+        return true; // Successfully read parameters
     }
 
     private static void ParseFiberField(SennState state, string name, string value, IFormatProvider ci)
@@ -997,16 +1040,49 @@ public static class SennRunner
         w.WriteLine($"DIAMH= {state.DIAMH.ToString("F5", ci)}\t\t DIAMETER OF CELL BODY (cm)");
         w.WriteLine();
 
-        // Fortran wrote '1' with FORMAT('1'); we don't need page eject here.
-        // w.WriteLine("1");
+        // Fortran FORMAT('1') - page eject character
+        w.WriteLine("1");
 
         // URATIO = UIO2/UIO if appropriate
         if (state.IWAVE != 8 && state.IWAVE != 9 && Math.Abs(state.UIO) > 0.0)
         {
             state.URATIO = state.UIO2 / state.UIO;
         }
+
+        // COMPUTE TIMES OF PULSE LEAD AND PULSE TRAIL
+        ComputePulseTimes(state);
     }
 
+    private static void ComputePulseTimes(SennState state)
+    {
+        // Fortran: IF(IWAVE .NE. 6)THEN
+        if (state.IWAVE != 6)
+        {
+            // DO I=1,NP
+            for (int i = 1; i <= state.NP; i++)
+            {
+                state.PT[i] = i * state.XPD + (i - 1) * state.DELAY;
+                state.PL[i] = state.PT[i] - state.XPD;
+                Console.WriteLine($"pl {state.PL[i]} pt {state.PT[i]} dly {state.DELAY}");
+            }
+        }
+        else
+        {
+            // IWAVE=6: special doublet logic
+            // DO I = 1,NP-1
+            for (int i = 1; i <= state.NP - 1; i++)
+            {
+                state.PT[i] = i * state.XPD + (i - 1) * state.DELAY; // time of trailing edge of stimuli +delay
+                state.PL[i] = state.PT[i] - state.XPD; // time of leading edge of stimulus
+                Console.WriteLine($"pl {state.PL[i]} pt {state.PT[i]} dly {state.DELAY}");
+
+                // PT(I+1)=DELAY + XPD+I*XPD2  (modified 1/16/2010)
+                state.PT[i + 1] = state.DELAY + state.XPD + i * state.XPD2;
+                state.PL[i + 1] = state.PT[i + 1] - state.XPD2;
+                Console.WriteLine($"pln {state.PL[i + 1]} pt {state.PT[i + 1]} dly {state.DELAY}");
+            }
+        }
+    }
 
     private static void SetupGeometryAndRunParameters(SennState state)
     {
@@ -1026,9 +1102,21 @@ public static class SennRunner
         state.PRMT[2] = state.FINAL;
         state.TEND = state.FINAL;
 
-        // In the Fortran, 407 (run-out mode) is reached by GOTO from elsewhere.
-        // Here we leave TEND = FINAL by default; if needed we can add a helper
-        // to recompute TEND from XPD (see below).
+        // Fortran logic: IF(ITHR.EQ.1) GO TO 408 / IF(ITHR .EQ. 0) GO TO 408
+        // If ITHR is neither 0 nor 1, fall through to label 407 (run-out mode)
+        // which calculates TEND based on XPD
+        if (state.ITHR != 0 && state.ITHR != 1)
+        {
+            // Label 407: RUN OUT MODE modified by stimulus width
+            state.TEND = state.XPD + 0.5;
+            if (state.XPD >= 0.1 && state.XPD <= 0.5)
+                state.TEND = state.TEND + 0.47;
+            if (state.XPD >= 1.0 && state.XPD < 1.5)
+                state.TEND = state.XPD + 0.3;
+            if (state.XPD >= 2.0)
+                state.TEND = state.XPD + 0.2;
+        }
+        // Label 408: CONTINUE (both ITHR==0 and ITHR==1 use FINAL as TEND)
 
         state.PRMT[3] = state.DELT;
         state.PRMT[4] = 100.0;
