@@ -1209,11 +1209,8 @@ public static class SennRunner
     {
         var w = state.DataOutWriter;
 
-        // BASED ON OPTION SELECTED FOR STIMULUS CURRENT PRINT
-        state.IA = 0;
-        state.IB = 0;
-        state.YMAX = -1e38;  // MAXIMUM VALUE BELOW THRESHOLD
-        state.YMIN = 1e38;  // MINIMUM VALUE ABOVE THRESHOLD
+        // NOTE: IA, IB, YMAX, YMIN are initialized ONCE per run in InitializeThresholdSearchCounters(),
+        // NOT on every iteration. See Fortran lines 671-674.
 
         // Computed GOTO mapping in Fortran:
         // GO TO (16,11,12,13,14,16,20,17,17,11,11,11,20), IWAVE
@@ -1682,6 +1679,13 @@ public static class SennRunner
 
     private static void RunThresholdSearch(SennState state)
     {
+        // Initialize threshold search counters ONCE before the iteration loop
+        // Fortran lines 671-674: IA=0, IB=0, YMAX=-1e38, YMIN=1e38
+        state.IA = 0;
+        state.IB = 0;
+        state.YMAX = -1e38;  // MAXIMUM VALUE BELOW THRESHOLD
+        state.YMIN = 1e38;   // MINIMUM VALUE ABOVE THRESHOLD
+
         bool again;
 
         do
@@ -2138,6 +2142,7 @@ public static class SennRunner
         int nodes = s.NON + 1;
 
         // --- First call in a run? Reset arrays (VMAX must be set to 0 at start of run) ---
+        // Fortran: IF(VMAX.NE.0.) GO TO 70
         if (Math.Abs(s.VMAX) < 1e-12)
         {
             for (int i = 1; i <= 1100; i++)
@@ -2150,7 +2155,8 @@ public static class SennRunner
                 s.TTIME[i] = 0.0;
             }
             s.NNGTT = 0;
-            s.NodeExcit = 0;
+            // NOTE: Do NOT reset NodeExcit here - Fortran doesn't reset NODEXCIT
+            // NODEXCIT retains its value from when NFOUND first became true
         }
 
         // --- Find global max voltage over nonlinear region (1..NLIN2) ---
