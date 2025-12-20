@@ -304,12 +304,11 @@ public static class SennRunner
         state.CB[4, 3] = 10.0;
 
         // ===== General Membrane & Axon Parameters =====
-        state.CM = 2.0;       // membrane capacitance (overridden in inparam.txt)
-        state.RHOI = 110.0;     // axoplasm resistivity (overridden)
-        state.GM = 30.365;    // membrane conductance (overridden)
-        state.GAP = 0.00025;   // gap width (overridden)
+        // NOTE: CM, RHOI, GM, and GAP are user-configurable parameters
+        // They should NOT be set here as they come from input (GUI or file)
+        // Setting them here would override user input values
 
-        // These two appear to be geometric ratios:
+        // These two appear to be geometric ratios (not user-configurable):
         state.ELD = 100.0;      // internodal length / fiber diameter
         state.SDD = 0.7;        // ratio axon diameter / fiber diameter
 

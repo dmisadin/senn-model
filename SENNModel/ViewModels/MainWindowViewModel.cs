@@ -1,10 +1,9 @@
 ﻿using CommunityToolkit.Mvvm.Input;
-using CommunityToolkit.Mvvm.ComponentModel;
 using SENNModel.Models;
 
 namespace SENNModel.ViewModels;
 
-public partial class MainWindowViewModel : ObservableObject
+public partial class MainWindowViewModel
 {
     public InputParams InputParams { get; } = new InputParams();
     public bool ShouldUseTextFileInput { get; set; } = false;
