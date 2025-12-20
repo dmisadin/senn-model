@@ -6,126 +6,249 @@
         mc:Ignorable="d"
         x:Class="SENNModel.Views.MainWindow"
         x:DataType="vm:MainWindowViewModel"
-        Width="1000"
-        Height="800"
+        Width="1400"
+        Height="900"
         Title="SENN Model">
 
-    <ScrollViewer>
-        <Grid ColumnDefinitions="2*, 3*" RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,
-                      Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,
-                      Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,
-                      Auto" Margin="20" RowSpacing="8" ColumnSpacing="12">
+    <Grid Margin="20" RowDefinitions="Auto,*">
+        <!-- Main content with 3 columns -->
+        <ScrollViewer Grid.Row="0" VerticalScrollBarVisibility="Auto">
+            <Grid ColumnDefinitions="*,*,*" ColumnSpacing="20" RowSpacing="12">
+                
+                <!-- FIBER Column -->
+                <StackPanel Grid.Column="0" Spacing="8">
+                    <TextBlock Text="FIBER" FontSize="16" FontWeight="Bold" Margin="0,0,0,8"/>
+                    
+                    <StackPanel Spacing="4">
+                        <TextBlock Text="NNODES"/>
+                        <NumericUpDown Value="{Binding InputParams.Nnodes}" Minimum="1" Maximum="1000"/>
+                    </StackPanel>
+                    
+                    <StackPanel Spacing="4">
+                        <TextBlock Text="NLIN1"/>
+                        <NumericUpDown Value="{Binding InputParams.Nlin1}" Minimum="1" Maximum="1000"/>
+                    </StackPanel>
+                    
+                    <StackPanel Spacing="4">
+                        <TextBlock Text="NLIN2"/>
+                        <NumericUpDown Value="{Binding InputParams.Nlin2}" Minimum="1" Maximum="1000"/>
+                    </StackPanel>
+                    
+                    <StackPanel Spacing="4">
+                        <TextBlock Text="NODE1"/>
+                        <NumericUpDown Value="{Binding InputParams.Node1}" Minimum="1" Maximum="1000"/>
+                    </StackPanel>
+                    
+                    <StackPanel Spacing="4">
+                        <TextBlock Text="DIAM"/>
+                        <NumericUpDown Value="{Binding InputParams.Diam}" Minimum="0" Maximum="1"/>
+                    </StackPanel>
+                    
+                    <StackPanel Spacing="4">
+                        <TextBlock Text="GAP"/>
+                        <NumericUpDown Value="{Binding InputParams.Gap}" FormatString="F5" Minimum="0" Maximum="1"/>
+                    </StackPanel>
+                    
+                    <StackPanel Spacing="4">
+                        <TextBlock Text="CM"/>
+                        <NumericUpDown Value="{Binding InputParams.Cm}" FormatString="F1" Minimum="0" Maximum="100"/>
+                    </StackPanel>
+                    
+                    <StackPanel Spacing="4">
+                        <TextBlock Text="GM"/>
+                        <NumericUpDown Value="{Binding InputParams.Gm}" FormatString="F3" Minimum="0" Maximum="1000"/>
+                    </StackPanel>
+                    
+                    <StackPanel Spacing="4">
+                        <TextBlock Text="RHOI"/>
+                        <NumericUpDown Value="{Binding InputParams.Rhoi}" FormatString="F1" Minimum="0" Maximum="10000"/>
+                    </StackPanel>
+                    
+                    <StackPanel Spacing="4">
+                        <TextBlock Text="RHOE"/>
+                        <NumericUpDown Value="{Binding InputParams.Rhoe}" FormatString="F1" Minimum="0" Maximum="10000"/>
+                    </StackPanel>
+                </StackPanel>
 
-            <!-- Auto-generate 30 inputs -->
-            <!-- Label + TextBox per row -->
-            <!-- Rows 0–29 (30 rows) -->
+                <!-- STIMULUS Column -->
+                <ScrollViewer Grid.Column="1" VerticalScrollBarVisibility="Auto" MaxHeight="800">
+                    <StackPanel Spacing="8">
+                        <TextBlock Text="STIMULUS" FontSize="16" FontWeight="Bold" Margin="0,0,0,8"/>
+                        
+                        <StackPanel Spacing="4">
+                            <TextBlock Text="XC"/>
+                            <NumericUpDown Value="{Binding InputParams.Xc}" FormatString="F1" Minimum="-10000" Maximum="10000"/>
+                        </StackPanel>
+                        
+                        <StackPanel Spacing="4">
+                            <TextBlock Text="YC"/>
+                            <NumericUpDown Value="{Binding InputParams.Yc}" FormatString="F1" Minimum="-10000" Maximum="10000"/>
+                        </StackPanel>
+                        
+                        <StackPanel Spacing="4">
+                            <TextBlock Text="XA"/>
+                            <NumericUpDown Value="{Binding InputParams.Xa}" FormatString="F1" Minimum="-10000" Maximum="10000"/>
+                        </StackPanel>
+                        
+                        <StackPanel Spacing="4">
+                            <TextBlock Text="YA"/>
+                            <NumericUpDown Value="{Binding InputParams.Ya}" FormatString="F1" Minimum="-10000" Maximum="10000"/>
+                        </StackPanel>
+                        
+                        <StackPanel Spacing="4">
+                            <TextBlock Text="WIREL"/>
+                            <NumericUpDown Value="{Binding InputParams.Wirel}" FormatString="F2" Minimum="0" Maximum="100"/>
+                        </StackPanel>
+                        
+                        <StackPanel Spacing="4">
+                            <TextBlock Text="IWAVE"/>
+                            <NumericUpDown Value="{Binding InputParams.Iwave}" Minimum="0" Maximum="20"/>
+                        </StackPanel>
+                        
+                        <StackPanel Spacing="4">
+                            <TextBlock Text="UIO"/>
+                            <NumericUpDown Value="{Binding InputParams.Uio}" FormatString="F1" Minimum="-10000" Maximum="10000"/>
+                        </StackPanel>
+                        
+                        <StackPanel Spacing="4">
+                            <TextBlock Text="XPD"/>
+                            <NumericUpDown Value="{Binding InputParams.Xpd}" FormatString="F1" Minimum="0" Maximum="1000"/>
+                        </StackPanel>
+                        
+                        <StackPanel Spacing="4">
+                            <TextBlock Text="UIO2"/>
+                            <NumericUpDown Value="{Binding InputParams.Uio2}" FormatString="F1" Minimum="-10000" Maximum="10000"/>
+                        </StackPanel>
+                        
+                        <StackPanel Spacing="4">
+                            <TextBlock Text="XPD2"/>
+                            <NumericUpDown Value="{Binding InputParams.Xpd2}" FormatString="F1" Minimum="0" Maximum="1000"/>
+                        </StackPanel>
+                        
+                        <StackPanel Spacing="4">
+                            <TextBlock Text="DELAY"/>
+                            <NumericUpDown Value="{Binding InputParams.Delay}" FormatString="F1" Minimum="0" Maximum="1000"/>
+                        </StackPanel>
+                        
+                        <StackPanel Spacing="4">
+                            <TextBlock Text="FREQ"/>
+                            <NumericUpDown Value="{Binding InputParams.Freq}" FormatString="F1" Minimum="0" Maximum="10000"/>
+                        </StackPanel>
+                        
+                        <StackPanel Spacing="4">
+                            <TextBlock Text="PHASE"/>
+                            <NumericUpDown Value="{Binding InputParams.Phase}" FormatString="F1" Minimum="-1000" Maximum="1000"/>
+                        </StackPanel>
+                        
+                        <StackPanel Spacing="4">
+                            <TextBlock Text="FREQ2"/>
+                            <NumericUpDown Value="{Binding InputParams.Freq2}" FormatString="F1" Minimum="0" Maximum="10000"/>
+                        </StackPanel>
+                        
+                        <StackPanel Spacing="4">
+                            <TextBlock Text="PHASE2"/>
+                            <NumericUpDown Value="{Binding InputParams.Phase2}" FormatString="F1" Minimum="-1000" Maximum="1000"/>
+                        </StackPanel>
+                        
+                        <StackPanel Spacing="4">
+                            <TextBlock Text="AMP2"/>
+                            <NumericUpDown Value="{Binding InputParams.Amp2}" FormatString="F1" Minimum="-10000" Maximum="10000"/>
+                        </StackPanel>
+                        
+                        <StackPanel Spacing="4">
+                            <TextBlock Text="NSINES"/>
+                            <NumericUpDown Value="{Binding InputParams.Nsines}" Minimum="0" Maximum="1000"/>
+                        </StackPanel>
+                        
+                        <StackPanel Spacing="4">
+                            <TextBlock Text="DCOFF"/>
+                            <NumericUpDown Value="{Binding InputParams.Dcoff}" FormatString="F1" Minimum="-10000" Maximum="10000"/>
+                        </StackPanel>
+                        
+                        <StackPanel Spacing="4">
+                            <TextBlock Text="TAUS"/>
+                            <NumericUpDown Value="{Binding InputParams.Taus}" FormatString="F1" Minimum="0" Maximum="10000"/>
+                        </StackPanel>
+                        
+                        <StackPanel Spacing="4">
+                            <TextBlock Text="VREF"/>
+                            <NumericUpDown Value="{Binding InputParams.Vref}" FormatString="F1" Minimum="-1000" Maximum="1000"/>
+                        </StackPanel>
+                        
+                        <StackPanel Spacing="4">
+                            <TextBlock Text="NP"/>
+                            <NumericUpDown Value="{Binding InputParams.Np}" Minimum="1" Maximum="1000"/>
+                        </StackPanel>
+                        
+                        <StackPanel Spacing="4">
+                            <TextBlock Text="FS"/>
+                            <NumericUpDown Value="{Binding InputParams.Fs}" Minimum="0" Maximum="10"/>
+                        </StackPanel>
+                        
+                        <StackPanel Spacing="4">
+                            <TextBlock Text="S"/>
+                            <NumericUpDown Value="{Binding InputParams.S}" Minimum="0" Maximum="10"/>
+                        </StackPanel>
+                        
+                        <StackPanel Spacing="4">
+                            <TextBlock Text="NTRP"/>
+                            <NumericUpDown Value="{Binding InputParams.Ntrp}" Minimum="0" Maximum="10"/>
+                        </StackPanel>
+                    </StackPanel>
+                </ScrollViewer>
 
-            <TextBlock Grid.Row="0"  Grid.Column="0" Text="Field 1:"  />
-            <TextBox   Grid.Row="0"  Grid.Column="1" Text="{Binding Field1}" />
+                <!-- CONTROL Column -->
+                <StackPanel Grid.Column="2" Spacing="8">
+                    <TextBlock Text="CONTROL" FontSize="16" FontWeight="Bold" Margin="0,0,0,8"/>
+                    
+                    <StackPanel Spacing="4">
+                        <TextBlock Text="ITHR"/>
+                        <NumericUpDown Value="{Binding InputParams.Ithr}" Minimum="0" Maximum="10"/>
+                    </StackPanel>
+                    
+                    <StackPanel Spacing="4">
+                        <TextBlock Text="VTH"/>
+                        <NumericUpDown Value="{Binding InputParams.Vth}" FormatString="F1" Minimum="0" Maximum="1000"/>
+                    </StackPanel>
+                    
+                    <StackPanel Spacing="4">
+                        <TextBlock Text="NTHNODE"/>
+                        <NumericUpDown Value="{Binding InputParams.Nthnode}" Minimum="0" Maximum="1000"/>
+                    </StackPanel>
+                    
+                    <StackPanel Spacing="4">
+                        <TextBlock Text="DELT"/>
+                        <NumericUpDown Value="{Binding InputParams.Delt}" FormatString="F4" Minimum="0" Maximum="1"/>
+                    </StackPanel>
+                    
+                    <StackPanel Spacing="4">
+                        <TextBlock Text="DELT2M"/>
+                        <NumericUpDown Value="{Binding InputParams.Delt2m}" FormatString="F1" Minimum="0" Maximum="1000"/>
+                    </StackPanel>
+                    
+                    <StackPanel Spacing="4">
+                        <TextBlock Text="FINAL"/>
+                        <NumericUpDown Value="{Binding InputParams.Final}" FormatString="F1" Minimum="0" Maximum="10000"/>
+                    </StackPanel>
+                    
+                    <StackPanel Spacing="4">
+                        <TextBlock Text="IPRNT"/>
+                        <NumericUpDown Value="{Binding InputParams.Iprnt}" Minimum="1" Maximum="10000"/>
+                    </StackPanel>
+                </StackPanel>
+            </Grid>
+        </ScrollViewer>
 
-            <TextBlock Grid.Row="1"  Grid.Column="0" Text="Field 2:"  />
-            <TextBox   Grid.Row="1"  Grid.Column="1" Text="{Binding Field2}" />
-
-            <TextBlock Grid.Row="2"  Grid.Column="0" Text="Field 3:" />
-            <TextBox   Grid.Row="2"  Grid.Column="1" Text="{Binding Field3}" />
-
-            <TextBlock Grid.Row="3"  Grid.Column="0" Text="Field 4:" />
-            <TextBox   Grid.Row="3"  Grid.Column="1" Text="{Binding Field4}" />
-
-            <TextBlock Grid.Row="4"  Grid.Column="0" Text="Field 5:" />
-            <TextBox   Grid.Row="4"  Grid.Column="1" Text="{Binding Field5}" />
-
-            <TextBlock Grid.Row="5"  Grid.Column="0" Text="Field 6:" />
-            <TextBox   Grid.Row="5"  Grid.Column="1" Text="{Binding Field6}" />
-
-            <TextBlock Grid.Row="6"  Grid.Column="0" Text="Field 7:" />
-            <TextBox   Grid.Row="6"  Grid.Column="1" Text="{Binding Field7}" />
-
-            <TextBlock Grid.Row="7"  Grid.Column="0" Text="Field 8:" />
-            <TextBox   Grid.Row="7"  Grid.Column="1" Text="{Binding Field8}" />
-
-            <TextBlock Grid.Row="8"  Grid.Column="0" Text="Field 9:" />
-            <TextBox   Grid.Row="8"  Grid.Column="1" Text="{Binding Field9}" />
-
-            <TextBlock Grid.Row="9"  Grid.Column="0" Text="Field 10:" />
-            <TextBox   Grid.Row="9"  Grid.Column="1" Text="{Binding Field10}" />
-
-            <TextBlock Grid.Row="10" Grid.Column="0" Text="Field 11:" />
-            <TextBox   Grid.Row="10" Grid.Column="1" Text="{Binding Field11}" />
-
-            <TextBlock Grid.Row="11" Grid.Column="0" Text="Field 12:" />
-            <TextBox   Grid.Row="11" Grid.Column="1" Text="{Binding Field12}" />
-
-            <TextBlock Grid.Row="12" Grid.Column="0" Text="Field 13:" />
-            <TextBox   Grid.Row="12" Grid.Column="1" Text="{Binding Field13}" />
-
-            <TextBlock Grid.Row="13" Grid.Column="0" Text="Field 14:" />
-            <TextBox   Grid.Row="13" Grid.Column="1" Text="{Binding Field14}" />
-
-            <TextBlock Grid.Row="14" Grid.Column="0" Text="Field 15:" />
-            <TextBox   Grid.Row="14" Grid.Column="1" Text="{Binding Field15}" />
-
-            <TextBlock Grid.Row="15" Grid.Column="0" Text="Field 16:" />
-            <TextBox   Grid.Row="15" Grid.Column="1" Text="{Binding Field16}" />
-
-            <TextBlock Grid.Row="16" Grid.Column="0" Text="Field 17:" />
-            <TextBox   Grid.Row="16" Grid.Column="1" Text="{Binding Field17}" />
-
-            <TextBlock Grid.Row="17" Grid.Column="0" Text="Field 18:" />
-            <TextBox   Grid.Row="17" Grid.Column="1" Text="{Binding Field18}" />
-
-            <TextBlock Grid.Row="18" Grid.Column="0" Text="Field 19:" />
-            <TextBox   Grid.Row="18" Grid.Column="1" Text="{Binding Field19}" />
-
-            <TextBlock Grid.Row="19" Grid.Column="0" Text="Field 20:" />
-            <TextBox   Grid.Row="19" Grid.Column="1" Text="{Binding Field20}" />
-
-            <TextBlock Grid.Row="20" Grid.Column="0" Text="Field 21:" />
-            <TextBox   Grid.Row="20" Grid.Column="1" Text="{Binding Field21}" />
-
-            <TextBlock Grid.Row="21" Grid.Column="0" Text="Field 22:" />
-            <TextBox   Grid.Row="21" Grid.Column="1" Text="{Binding Field22}" />
-
-            <TextBlock Grid.Row="22" Grid.Column="0" Text="Field 23:" />
-            <TextBox   Grid.Row="22" Grid.Column="1" Text="{Binding Field23}" />
-
-            <TextBlock Grid.Row="23" Grid.Column="0" Text="Field 24:" />
-            <TextBox   Grid.Row="23" Grid.Column="1" Text="{Binding Field24}" />
-
-            <TextBlock Grid.Row="24" Grid.Column="0" Text="Field 25:" />
-            <TextBox   Grid.Row="24" Grid.Column="1" Text="{Binding Field25}" />
-
-            <TextBlock Grid.Row="25" Grid.Column="0" Text="Field 26:" />
-            <TextBox   Grid.Row="25" Grid.Column="1" Text="{Binding Field26}" />
-
-            <TextBlock Grid.Row="26" Grid.Column="0" Text="Field 27:" />
-            <TextBox   Grid.Row="26" Grid.Column="1" Text="{Binding Field27}" />
-
-            <TextBlock Grid.Row="27" Grid.Column="0" Text="Field 28:" />
-            <TextBox   Grid.Row="27" Grid.Column="1" Text="{Binding Field28}" />
-
-            <TextBlock Grid.Row="28" Grid.Column="0" Text="Field 29:" />
-            <TextBox   Grid.Row="28" Grid.Column="1" Text="{Binding Field29}" />
-
-            <TextBlock Grid.Row="29" Grid.Column="0" Text="Field 30:" />
-            <TextBox   Grid.Row="29" Grid.Column="1" Text="{Binding Field30}" />
-
-
-            <!-- Console Output -->
-            <TextBlock Grid.Row="30" Grid.Column="0" Text="Output:" Margin="0,20,0,0"/>
-            <TextBox Grid.Row="30" Grid.Column="1"
-                     Text="{Binding ConsoleOutput}"
-                     AcceptsReturn="True"
-                     IsReadOnly="True"
-                     Height="200"
-                     ScrollViewer.VerticalScrollBarVisibility="Auto" 
-                     Margin="0,20,0,0"/>
-
-            <Button Content="Run Simulation" Command="{Binding RunSimulationCommand}" />
-
-
+        <!-- Bottom row with Run Simulation button -->
+        <Grid Grid.Row="1" Margin="0,20,0,0">
+            <Button Content="Run Simulation" 
+                    Command="{Binding RunSimulationCommand}"
+                    HorizontalAlignment="Right"
+                    VerticalAlignment="Bottom"
+                    Width="150"
+                    Height="40"
+                    Margin="0,0,0,0"/>
         </Grid>
-
-    </ScrollViewer>
+    </Grid>
 
 </Window>
