@@ -1,4 +1,4 @@
-<Window xmlns="https://github.com/avaloniaui"
+﻿<Window xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
@@ -6,254 +6,335 @@
         mc:Ignorable="d"
         x:Class="SENNModel.Views.MainWindow"
         x:DataType="vm:MainWindowViewModel"
-        Width="1400"
-        Height="900"
-        Title="SENN Model">
+        Title="SENN Model"
+        SizeToContent="Width"
+        Height="900">
 
-    <Grid Margin="20" RowDefinitions="Auto,*">
+    <Grid Margin="20" RowDefinitions="*,Auto">
         <!-- Main content with 3 columns -->
-        <ScrollViewer Grid.Row="0" VerticalScrollBarVisibility="Auto">
-            <Grid ColumnDefinitions="*,*,*" ColumnSpacing="20" RowSpacing="12">
-                
-                <!-- FIBER Column -->
-                <StackPanel Grid.Column="0" Spacing="8">
-                    <TextBlock Text="FIBER" FontSize="16" FontWeight="Bold" Margin="0,0,0,8"/>
-                    
-                    <StackPanel Spacing="4">
-                        <TextBlock Text="NNODES"/>
-                        <NumericUpDown Value="{Binding InputParams.NNODES}" Minimum="1" Maximum="1000"/>
-                    </StackPanel>
-                    
-                    <StackPanel Spacing="4">
-                        <TextBlock Text="NLIN1"/>
-                        <NumericUpDown Value="{Binding InputParams.NLIN1}" Minimum="1" Maximum="1000"/>
-                    </StackPanel>
-                    
-                    <StackPanel Spacing="4">
-                        <TextBlock Text="NLIN2"/>
-                        <NumericUpDown Value="{Binding InputParams.NLIN2}" Minimum="1" Maximum="1000"/>
-                    </StackPanel>
-                    
-                    <StackPanel Spacing="4">
-                        <TextBlock Text="NODE1"/>
-                        <NumericUpDown Value="{Binding InputParams.NODE1}" Minimum="1" Maximum="1000"/>
-                    </StackPanel>
-                    
-                    <StackPanel Spacing="4">
-                        <TextBlock Text="DIAM"/>
-                        <NumericUpDown Value="{Binding InputParams.DIAM}" Minimum="0" Maximum="1"/>
-                    </StackPanel>
-                    
-                    <StackPanel Spacing="4">
-                        <TextBlock Text="GAP"/>
-                        <NumericUpDown Value="{Binding InputParams.GAP}" FormatString="F5" Minimum="0" Maximum="1"/>
-                    </StackPanel>
-                    
-                    <StackPanel Spacing="4">
-                        <TextBlock Text="CM"/>
-                        <NumericUpDown Value="{Binding InputParams.CM}" FormatString="F1" Minimum="0" Maximum="100"/>
-                    </StackPanel>
-                    
-                    <StackPanel Spacing="4">
-                        <TextBlock Text="GM"/>
-                        <NumericUpDown Value="{Binding InputParams.GM}" FormatString="F3" Minimum="0" Maximum="1000"/>
-                    </StackPanel>
-                    
-                    <StackPanel Spacing="4">
-                        <TextBlock Text="RHOI"/>
-                        <NumericUpDown Value="{Binding InputParams.RHOI}" FormatString="F1" Minimum="0" Maximum="10000"/>
-                    </StackPanel>
-                    
-                    <StackPanel Spacing="4">
-                        <TextBlock Text="RHOE"/>
-                        <NumericUpDown Value="{Binding InputParams.RHOE}" FormatString="F1" Minimum="0" Maximum="10000"/>
-                    </StackPanel>
-                </StackPanel>
-
-                <!-- STIMULUS Column -->
-                <ScrollViewer Grid.Column="1" VerticalScrollBarVisibility="Auto" MaxHeight="800">
+        <Grid Grid.Row="0" ColumnDefinitions="auto,auto,auto" ColumnSpacing="20">
+            
+            <!-- FIBER Column -->
+            <Grid Grid.Column="0" RowDefinitions="Auto,*" MinWidth="160">
+                <TextBlock Grid.Row="0" Text="FIBER" FontSize="16" FontWeight="Bold" Margin="0,0,0,8"/>
+                <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
                     <StackPanel Spacing="8">
-                        <TextBlock Text="STIMULUS" FontSize="16" FontWeight="Bold" Margin="0,0,0,8"/>
+                        <StackPanel Spacing="4">
+                            <TextBlock Text="NNODES" ToolTip.Tip="Number of nodes in the fiber (odd only)"/>
+                            <NumericUpDown Value="{Binding InputParams.NNODES}" Minimum="1" Maximum="1000"/>
+                        </StackPanel>
                         
                         <StackPanel Spacing="4">
-                            <TextBlock Text="XC"/>
+                            <TextBlock Text="NLIN1" ToolTip.Tip="First nonlinear node"/>
+                            <NumericUpDown Value="{Binding InputParams.NLIN1}" Minimum="1" Maximum="1000"/>
+                        </StackPanel>
+                        
+                        <StackPanel Spacing="4">
+                            <TextBlock Text="NLIN2" ToolTip.Tip="Last nonlinear node"/>
+                            <NumericUpDown Value="{Binding InputParams.NLIN2}" Minimum="1" Maximum="1000"/>
+                        </StackPanel>
+                        
+                        <StackPanel Spacing="4">
+                            <TextBlock Text="NODE1" ToolTip.Tip="First print node (10 nodes printed)"/>
+                            <NumericUpDown Value="{Binding InputParams.NODE1}" Minimum="1" Maximum="1000"/>
+                        </StackPanel>
+                        
+                        <StackPanel Spacing="4">
+                            <TextBlock Text="DIAM" ToolTip.Tip="Fiber diameter (cm)"/>
+                            <NumericUpDown Value="{Binding InputParams.DIAM}" Minimum="0" Maximum="1"/>
+                        </StackPanel>
+                        
+                        <StackPanel Spacing="4">
+                            <TextBlock Text="GAP" ToolTip.Tip="Intranodal gap width (cm)"/>
+                            <NumericUpDown Value="{Binding InputParams.GAP}" FormatString="F5" Minimum="0" Maximum="1"/>
+                        </StackPanel>
+                        
+                        <StackPanel Spacing="4">
+                            <TextBlock Text="CM" ToolTip.Tip="Membrane capacitance per unit area (μF/cm²)"/>
+                            <NumericUpDown Value="{Binding InputParams.CM}" FormatString="F1" Minimum="0" Maximum="100"/>
+                        </StackPanel>
+                        
+                        <StackPanel Spacing="4">
+                            <TextBlock Text="GM" ToolTip.Tip="Linear membrane conductance per unit area (mS/cm²)"/>
+                            <NumericUpDown Value="{Binding InputParams.GM}" FormatString="F3" Minimum="0" Maximum="1000"/>
+                        </StackPanel>
+                        
+                        <StackPanel Spacing="4">
+                            <TextBlock Text="RHOI" ToolTip.Tip="Axoplasm resistivity (ohm·cm)"/>
+                            <NumericUpDown Value="{Binding InputParams.RHOI}" FormatString="F1" Minimum="0" Maximum="10000"/>
+                        </StackPanel>
+                        
+                        <StackPanel Spacing="4">
+                            <TextBlock Text="RHOE" ToolTip.Tip="Medium resistivity (ohm·cm)"/>
+                            <NumericUpDown Value="{Binding InputParams.RHOE}" FormatString="F1" Minimum="0" Maximum="10000"/>
+                        </StackPanel>
+                    </StackPanel>
+                </ScrollViewer>
+            </Grid>
+
+            <!-- STIMULUS Column -->
+            <Grid Grid.Column="1" RowDefinitions="Auto,*" MinWidth="160">
+                <TextBlock Grid.Row="0" Text="STIMULUS" FontSize="16" FontWeight="Bold" Margin="0,0,0,8"/>
+                <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+                    <StackPanel Spacing="8">
+                        <StackPanel Spacing="4">
+                            <TextBlock Text="XC" ToolTip.Tip="x coordinate of C electrode, FS=0 or FS=3 (cm)"/>
                             <NumericUpDown Value="{Binding InputParams.XC}" FormatString="F1" Minimum="-10000" Maximum="10000"/>
                         </StackPanel>
                         
                         <StackPanel Spacing="4">
-                            <TextBlock Text="YC"/>
+                            <TextBlock Text="YC" ToolTip.Tip="y coordinate of C electrode, FS=0 or FS=3 (cm)"/>
                             <NumericUpDown Value="{Binding InputParams.YC}" FormatString="F1" Minimum="-10000" Maximum="10000"/>
                         </StackPanel>
                         
                         <StackPanel Spacing="4">
-                            <TextBlock Text="XA"/>
+                            <TextBlock Text="XA" ToolTip.Tip="x coordinate of A electrode, FS=0 or FS=3 (cm)"/>
                             <NumericUpDown Value="{Binding InputParams.XA}" FormatString="F1" Minimum="-10000" Maximum="10000"/>
                         </StackPanel>
                         
                         <StackPanel Spacing="4">
-                            <TextBlock Text="YA"/>
+                            <TextBlock Text="YA" ToolTip.Tip="y coordinate of A electrode, FS=0 or FS=3 (cm)"/>
                             <NumericUpDown Value="{Binding InputParams.YA}" FormatString="F1" Minimum="-10000" Maximum="10000"/>
                         </StackPanel>
                         
                         <StackPanel Spacing="4">
-                            <TextBlock Text="WIREL"/>
+                            <TextBlock Text="WIREL" ToolTip.Tip="Wire electrode length, monopolar only, FS=3 (cm)"/>
                             <NumericUpDown Value="{Binding InputParams.WIREL}" FormatString="F2" Minimum="0" Maximum="100"/>
                         </StackPanel>
                         
                         <StackPanel Spacing="4">
-                            <TextBlock Text="IWAVE"/>
+                            <TextBlock Text="IWAVE">
+                                <ToolTip.Tip>
+                                    <StackPanel>
+                                        <TextBlock FontSize="16"> Temporal waveform type: </TextBlock>
+                                        <TextBlock> 1 = monophasic square pulse </TextBlock>
+                                        <TextBlock> 2 = sinewave </TextBlock>
+                                        <TextBlock> 3 = sinewave = dc (not operational) </TextBlock>
+                                        <TextBlock> 4 = exponentia </TextBlock>
+                                        <TextBlock> 5 = sinewave * exponential </TextBlock>
+                                        <TextBlock> 6 = monophasic square doublet for UIO/UIO2 >+ 0 or biphasic square doublet for UIO/UIO2 &lt; 0 </TextBlock>
+                                        <TextBlock> 7 = special input (not operational) </TextBlock>
+                                        <TextBlock> 8 = monophasic square pulse followed by sinewave (not operational) </TextBlock>
+                                        <TextBlock> 9 = sinewave followed by monophasic square pulse (not operational) </TextBlock>
+                                        <TextBlock> 10 = sum of two sinewaves </TextBlock>
+                                        <TextBlock> 11 = cosine amplitude modulation, two sinusoids </TextBlock>
+                                        <TextBlock> 12 = sum of multiple sinusoids: input array of peak amplitudes, frequencies, and phases </TextBlock>
+                                        <TextBlock> 13 = arbitrary waveform: input array of (time/amplitude) data points </TextBlock>
+                                    </StackPanel>
+                                </ToolTip.Tip>
+                            </TextBlock>
                             <NumericUpDown Value="{Binding InputParams.IWAVE}" Minimum="0" Maximum="20"/>
                         </StackPanel>
                         
                         <StackPanel Spacing="4">
-                            <TextBlock Text="UIO"/>
+                            <TextBlock Text="UIO">
+                                <ToolTip.Tip>
+                                    <StackPanel>
+                                        <TextBlock FontSize="16"> Initial estimate: </TextBlock>
+                                        <TextBlock> Initial estimate, stimulus threshold amplitude </TextBlock>
+                                        <TextBlock> (mA for FS = 0 or FS = 3, mA/cm² for FS = 1); </TextBlock>
+                                        <TextBlock> must be positive in all modes; </TextBlock>
+                                        <TextBlock> see Section 12.4.4 for more details  </TextBlock>
+                                    </StackPanel>
+                                </ToolTip.Tip>
+                            </TextBlock>
                             <NumericUpDown Value="{Binding InputParams.UIO}" FormatString="F1" Minimum="-10000" Maximum="10000"/>
                         </StackPanel>
                         
                         <StackPanel Spacing="4">
-                            <TextBlock Text="XPD"/>
+                            <TextBlock Text="XPD" ToolTip.Tip="Pulse or phase duration (ms); see Section 12.4.5 for more details"/>
                             <NumericUpDown Value="{Binding InputParams.XPD}" FormatString="F1" Minimum="0" Maximum="1000"/>
                         </StackPanel>
                         
                         <StackPanel Spacing="4">
-                            <TextBlock Text="UIO2"/>
+                            <TextBlock Text="UIO2">
+                                <ToolTip.Tip>
+                                    <StackPanel>
+                                        <TextBlock FontSize="16"> Initial stimulus threshold amplitude: </TextBlock>
+                                        <TextBlock> relative to UIO, </TextBlock>
+                                        <TextBlock> (mA for FS = 0 or FS = 3, mA/cm² for FS = 1), </TextBlock>
+                                        <TextBlock> positive or negative for second phase of IWAVE = 6, 8, 9; </TextBlock>
+                                        <TextBlock> see Section 12.4.4 for more details  </TextBlock>
+                                    </StackPanel>
+                                </ToolTip.Tip>
+                            </TextBlock>
                             <NumericUpDown Value="{Binding InputParams.UIO2}" FormatString="F1" Minimum="-10000" Maximum="10000"/>
                         </StackPanel>
                         
                         <StackPanel Spacing="4">
-                            <TextBlock Text="XPD2"/>
+                            <TextBlock Text="XPD2" ToolTip.Tip="Duration, second phase of doublet (ms) for IWAVE = 6"/>
                             <NumericUpDown Value="{Binding InputParams.XPD2}" FormatString="F1" Minimum="0" Maximum="1000"/>
                         </StackPanel>
                         
                         <StackPanel Spacing="4">
-                            <TextBlock Text="DELAY"/>
+                            <TextBlock Text="DELAY" ToolTip.Tip="Delay between pulses for IWAVE = 1, or phases of a pulse doublet for IWAVE = 6 (ms)"/>
                             <NumericUpDown Value="{Binding InputParams.DELAY}" FormatString="F1" Minimum="0" Maximum="1000"/>
                         </StackPanel>
                         
                         <StackPanel Spacing="4">
-                            <TextBlock Text="FREQ"/>
+                            <TextBlock Text="FREQ" ToolTip.Tip="First sinusoid frequency (kHz) for IWAVE = 2,3,5,8,9,10,11"/>
                             <NumericUpDown Value="{Binding InputParams.FREQ}" FormatString="F1" Minimum="0" Maximum="10000"/>
                         </StackPanel>
                         
                         <StackPanel Spacing="4">
-                            <TextBlock Text="PHASE"/>
+                            <TextBlock Text="PHASE" ToolTip.Tip="First sinusoid phase (degrees)"/>
                             <NumericUpDown Value="{Binding InputParams.PHASE}" FormatString="F1" Minimum="-1000" Maximum="1000"/>
                         </StackPanel>
                         
                         <StackPanel Spacing="4">
-                            <TextBlock Text="FREQ2"/>
+                            <TextBlock Text="FREQ2" ToolTip.Tip="Second sinusoid frequency (kHz) for IWAVE = 10,11"/>
                             <NumericUpDown Value="{Binding InputParams.FREQ2}" FormatString="F1" Minimum="0" Maximum="10000"/>
                         </StackPanel>
                         
                         <StackPanel Spacing="4">
-                            <TextBlock Text="PHASE2"/>
+                            <TextBlock Text="PHASE2" ToolTip.Tip="Second sinusoid phase (degrees) for IWAVE = 10, 11"/>
                             <NumericUpDown Value="{Binding InputParams.PHASE2}" FormatString="F1" Minimum="-1000" Maximum="1000"/>
                         </StackPanel>
                         
                         <StackPanel Spacing="4">
-                            <TextBlock Text="AMP2"/>
+                            <TextBlock Text="AMP2" ToolTip.Tip="Second sinusoid amplitude, relative to 1 mA for first sinusoid"/>
                             <NumericUpDown Value="{Binding InputParams.AMP2}" FormatString="F1" Minimum="-10000" Maximum="10000"/>
                         </StackPanel>
                         
                         <StackPanel Spacing="4">
-                            <TextBlock Text="NSINES"/>
+                            <TextBlock Text="NSINES" ToolTip.Tip="Number of sinusoids for IWAVE = 12"/>
                             <NumericUpDown Value="{Binding InputParams.NSINES}" Minimum="0" Maximum="1000"/>
                         </StackPanel>
                         
                         <StackPanel Spacing="4">
-                            <TextBlock Text="DCOFF"/>
+                            <TextBlock Text="DCOFF" ToolTip.Tip="DC offset (mA) for IWAVE = 3"/>
                             <NumericUpDown Value="{Binding InputParams.DCOFF}" FormatString="F1" Minimum="-10000" Maximum="10000"/>
                         </StackPanel>
                         
                         <StackPanel Spacing="4">
-                            <TextBlock Text="TAUS"/>
+                            <TextBlock Text="TAUS" ToolTip.Tip="Exponential time constant (ms) for IWAVE = 4,5"/>
                             <NumericUpDown Value="{Binding InputParams.TAUS}" FormatString="F1" Minimum="0" Maximum="10000"/>
                         </StackPanel>
                         
                         <StackPanel Spacing="4">
-                            <TextBlock Text="VREF"/>
+                            <TextBlock Text="VREF" ToolTip.Tip="External potential at node 1 (mV) for FS = 1"/>
                             <NumericUpDown Value="{Binding InputParams.VREF}" FormatString="F1" Minimum="-1000" Maximum="1000"/>
                         </StackPanel>
                         
                         <StackPanel Spacing="4">
-                            <TextBlock Text="NP"/>
+                            <TextBlock Text="NP">
+                                <ToolTip.Tip>
+                                    <StackPanel>
+                                        <TextBlock FontSize="16"> Number of pulse repetitions: </TextBlock>
+                                        <TextBlock> for IWAVE = 1 (up to 127 monophasic pulse repetitions with delay between pulses) </TextBlock>
+                                        <TextBlock> and IWAVE = 6 (NP = 2, set internally by override) </TextBlock>
+                                        <TextBlock> to form a single biphasic doublet with delay between phases </TextBlock>
+                                    </StackPanel>
+                                </ToolTip.Tip>
+                            </TextBlock>
                             <NumericUpDown Value="{Binding InputParams.NP}" Minimum="1" Maximum="1000"/>
                         </StackPanel>
                         
                         <StackPanel Spacing="4">
-                            <TextBlock Text="FS"/>
+                            <TextBlock Text="FS">
+                                <ToolTip.Tip>
+                                    <StackPanel>
+                                        <TextBlock FontSize="16"> Spatial field source switch: </TextBlock>
+                                        <TextBlock> 0 = point electrodes, at specified x and y spatial coordinates </TextBlock>
+                                        <TextBlock> 1 = uniform field, parallel to neuron long axis </TextBlock>
+                                        <TextBlock> 2 = external potential (EPOT) array, verified for IWAVE = 1 only </TextBlock>
+                                        <TextBlock> 3 = wire electrodes, at specified x and y spatial coordinates, WIREL >> active YC or YA </TextBlock>
+                                    </StackPanel>
+                                </ToolTip.Tip>
+                            </TextBlock>
                             <NumericUpDown Value="{Binding InputParams.FS}" Minimum="0" Maximum="10"/>
                         </StackPanel>
                         
                         <StackPanel Spacing="4">
-                            <TextBlock Text="S"/>
+                            <TextBlock Text="S">
+                                <ToolTip.Tip>
+                                    <StackPanel>
+                                        <TextBlock FontSize="16"> Electrode environment switch: </TextBlock>
+                                        <TextBlock> 0 = electrodes <Italic>in situ</Italic> </TextBlock>
+                                        <TextBlock> 1 = electrodes on surface </TextBlock>
+                                    </StackPanel>
+                                </ToolTip.Tip>
+                            </TextBlock>
                             <NumericUpDown Value="{Binding InputParams.S}" Minimum="0" Maximum="10"/>
                         </StackPanel>
                         
                         <StackPanel Spacing="4">
-                            <TextBlock Text="NTRP"/>
+                            <TextBlock Text="NTRP" ToolTip.Tip="Number of linearly interpolated waveform data points, between consecutive original points, for IWAVE = 13"/>
                             <NumericUpDown Value="{Binding InputParams.NTRP}" Minimum="0" Maximum="10"/>
                         </StackPanel>
                     </StackPanel>
                 </ScrollViewer>
-
-                <!-- CONTROL Column -->
-                <StackPanel Grid.Column="2" Spacing="8">
-                    <TextBlock Text="CONTROL" FontSize="16" FontWeight="Bold" Margin="0,0,0,8"/>
-                    
-                    <StackPanel Spacing="4">
-                        <TextBlock Text="ITHR"/>
-                        <NumericUpDown Value="{Binding InputParams.ITHR}" Minimum="0" Maximum="10"/>
-                    </StackPanel>
-                    
-                    <StackPanel Spacing="4">
-                        <TextBlock Text="VTH"/>
-                        <NumericUpDown Value="{Binding InputParams.VTH}" FormatString="F1" Minimum="0" Maximum="1000"/>
-                    </StackPanel>
-                    
-                    <StackPanel Spacing="4">
-                        <TextBlock Text="NTHNODE"/>
-                        <NumericUpDown Value="{Binding InputParams.NTHNODE}" Minimum="0" Maximum="1000"/>
-                    </StackPanel>
-                    
-                    <StackPanel Spacing="4">
-                        <TextBlock Text="DELT"/>
-                        <NumericUpDown Value="{Binding InputParams.DELT}" FormatString="F4" Minimum="0" Maximum="1"/>
-                    </StackPanel>
-                    
-                    <StackPanel Spacing="4">
-                        <TextBlock Text="DELT2M"/>
-                        <NumericUpDown Value="{Binding InputParams.DELT2M}" FormatString="F1" Minimum="0" Maximum="1000"/>
-                    </StackPanel>
-                    
-                    <StackPanel Spacing="4">
-                        <TextBlock Text="FINAL"/>
-                        <NumericUpDown Value="{Binding InputParams.FINAL}" FormatString="F1" Minimum="0" Maximum="10000"/>
-                    </StackPanel>
-                    
-                    <StackPanel Spacing="4">
-                        <TextBlock Text="IPRNT"/>
-                        <NumericUpDown Value="{Binding InputParams.IPRNT}" Minimum="1" Maximum="10000"/>
-                    </StackPanel>
-                </StackPanel>
             </Grid>
-        </ScrollViewer>
 
-        <!-- Bottom row with Run Simulation button -->
-        <StackPanel Grid.Row="1"
-                    Grid.Column="2"
-                    Orientation="Horizontal"
-                    HorizontalAlignment="Right"
-                    VerticalAlignment="Bottom"
-                    Spacing="16">
+            <!-- CONTROL Column -->
+            <Grid Grid.Column="2" RowDefinitions="Auto,*" MinWidth="160">
+                <TextBlock Grid.Row="0" Text="CONTROL" FontSize="16" FontWeight="Bold" Margin="0,0,0,8"/>
+                <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+                    <StackPanel Spacing="8">
+                        <StackPanel Spacing="4">
+                            <TextBlock Text="ITHR">
+                                <ToolTip.Tip>
+                                    <StackPanel>
+                                        <TextBlock FontSize="16"> Iteration switch: </TextBlock>
+                                        <TextBlock> 0 = single iteration (no convergence) </TextBlock>
+                                        <TextBlock> 1 = multiple iterations converging to threshold </TextBlock>
+                                    </StackPanel>
+                                </ToolTip.Tip>
+                            </TextBlock>
+                            <NumericUpDown Value="{Binding InputParams.ITHR}" Minimum="0" Maximum="10"/>
+                        </StackPanel>
+                        
+                        <StackPanel Spacing="4">
+                            <TextBlock Text="VTH" ToolTip.Tip="Node transmembrane voltage criterion for threshold crossing (mV)"/>
+                            <NumericUpDown Value="{Binding InputParams.VTH}" FormatString="F1" Minimum="0" Maximum="1000"/>
+                        </StackPanel>
+                        
+                        <StackPanel Spacing="4">
+                            <TextBlock Text="NTHNODE" ToolTip.Tip="Minimum required number of consecutive nodes crossing VTH, when ITHR = 1"/>
+                            <NumericUpDown Value="{Binding InputParams.NTHNODE}" Minimum="0" Maximum="1000"/>
+                        </StackPanel>
+                        
+                        <StackPanel Spacing="4">
+                            <TextBlock Text="DELT" ToolTip.Tip="Temporal sampling period during waveform (ms), overridden by IWAVE = 13"/>
+                            <NumericUpDown Value="{Binding InputParams.DELT}" FormatString="F4" Minimum="0" Maximum="1"/>
+                        </StackPanel>
+                        
+                        <StackPanel Spacing="4">
+                            <TextBlock Text="DELT2M" ToolTip.Tip="Multiplier: DELT2M*DELT = DELT2, temporal sampling period after waveform (ms)"/>
+                            <NumericUpDown Value="{Binding InputParams.DELT2M}" FormatString="F1" Minimum="0" Maximum="1000"/>
+                        </StackPanel>
+                        
+                        <StackPanel Spacing="4">
+                            <TextBlock Text="FINAL" ToolTip.Tip="Maximum simulated solution time per run (ms), 2 ms minimum"/>
+                            <NumericUpDown Value="{Binding InputParams.FINAL}" FormatString="F1" Minimum="0" Maximum="10000"/>
+                        </StackPanel>
+                        
+                        <StackPanel Spacing="4">
+                            <TextBlock Text="IPRNT" ToolTip.Tip="Sample intervals skipped between writes to data.out"/>
+                            <NumericUpDown Value="{Binding InputParams.IPRNT}" Minimum="1" Maximum="10000"/>
+                        </StackPanel>
+                    </StackPanel>
+                </ScrollViewer>
+            </Grid>
+        </Grid>
 
-            <CheckBox Content="Use inparams.txt as input"
-                      IsChecked="{Binding ShouldUseTextFileInput, Mode=TwoWay}" />
+        <!-- Footer with checkbox and button -->
+        <Border Grid.Row="1" 
+                BorderBrush="{DynamicResource ThemeBorderBrush}" 
+                BorderThickness="0,1,0,0"
+                Padding="0,12,0,0"
+                Margin="0,12,0,0">
+            <StackPanel Orientation="Horizontal"
+                        HorizontalAlignment="Right"
+                        Spacing="16">
+                <CheckBox Content="Use inparams.txt as input"
+                          IsChecked="{Binding ShouldUseTextFileInput, Mode=TwoWay}" />
 
-            <Button Content="Run Simulation"
-                    Command="{Binding RunSimulationCommand}"
-                    Padding="16,10"/>
-        </StackPanel>
+                <Button Content="Run Simulation"
+                        Command="{Binding RunSimulationCommand}"
+                        Padding="16,10"/>
+            </StackPanel>
+        </Border>
     </Grid>
 
 </Window>
