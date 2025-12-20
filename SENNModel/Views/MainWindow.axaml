@@ -240,15 +240,20 @@
         </ScrollViewer>
 
         <!-- Bottom row with Run Simulation button -->
-        <Grid Grid.Row="1" Margin="0,20,0,0">
-            <Button Content="Run Simulation" 
-                    Command="{Binding RunSimulationCommand}"
+        <StackPanel Grid.Row="1"
+                    Grid.Column="2"
+                    Orientation="Horizontal"
                     HorizontalAlignment="Right"
                     VerticalAlignment="Bottom"
-                    Width="150"
-                    Height="40"
-                    Margin="0,0,0,0"/>
-        </Grid>
+                    Spacing="16">
+
+            <CheckBox Content="Use inparams.txt as input"
+                      IsChecked="{Binding ShouldUseTextFileInput, Mode=TwoWay}" />
+
+            <Button Content="Run Simulation"
+                    Command="{Binding RunSimulationCommand}"
+                    Padding="16,10"/>
+        </StackPanel>
     </Grid>
 
 </Window>
