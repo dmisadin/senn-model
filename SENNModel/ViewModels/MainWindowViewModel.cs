@@ -6,15 +6,11 @@ namespace SENNModel.ViewModels;
 
 public partial class MainWindowViewModel : ObservableObject
 {
-    [ObservableProperty] private InputParams inputParams = new InputParams();
-
-    [ObservableProperty] private string consoleOutput = "Console initialized...";
+    public InputParams InputParams { get; } = new InputParams();
 
     [RelayCommand]
     private void RunSimulation()
     {
-        SennRunner.Run(this.InputParams);
-        //SennRunner.Run();
+        SennRunner.Run(InputParams);
     }
-
 }

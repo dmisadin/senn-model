@@ -1,100 +1,54 @@
-using CommunityToolkit.Mvvm.ComponentModel;
-
 namespace SENNModel.Models;
 
-public partial class InputParams : ObservableObject
+public class InputParams
 {
     // FIBER properties
-    [ObservableProperty] private int nnodes = 51;
-    [ObservableProperty] private int nlin1 = 1;
-    [ObservableProperty] private int nlin2 = 51;
-    [ObservableProperty] private int node1 = 22;
-    [ObservableProperty] private double diam = 0.0020;
-    [ObservableProperty] private double gap = 0.00025;
-    [ObservableProperty] private double cm = 2.0;
-    [ObservableProperty] private double gm = 30.365;
-    [ObservableProperty] private double rhoi = 110.0;
-    [ObservableProperty] private double rhoe = 300.0;
+    public int NNODES { get; set; } = 51;
+    public int NLIN1 { get; set; } = 1;
+    public int NLIN2 { get; set; } = 51;
+    public int NODE1 { get; set; } = 22;
+    public double DIAM { get; set; } = 0.0020;
+    public double GAP { get; set; } = 0.00025;
+    public double CM { get; set; } = 2.0;
+    public double GM { get; set; } = 30.365;
+    public double RHOI { get; set; } = 110.0;
+    public double RHOE { get; set; } = 300.0;
 
     // STIMULUS properties
-    [ObservableProperty] private double xc = 0.0;
-    [ObservableProperty] private double yc = 1.0;
-    [ObservableProperty] private double xa = 100.0;
-    [ObservableProperty] private double ya = 100.0;
-    [ObservableProperty] private double wirel = 0.85;
-    [ObservableProperty] private int iwave = 2;
-    [ObservableProperty] private double uio = 16.0;
-    [ObservableProperty] private double xpd = 2.0;
-    [ObservableProperty] private double uio2 = 0.0;
-    [ObservableProperty] private double xpd2 = 0.0;
-    [ObservableProperty] private double delay = 0.0;
-    [ObservableProperty] private double freq = 5.0;
-    [ObservableProperty] private double phase = 0.0;
-    [ObservableProperty] private double freq2 = 0.0;
-    [ObservableProperty] private double phase2 = 0.0;
-    [ObservableProperty] private double amp2 = 0.0;
-    [ObservableProperty] private int nsines = 27;
-    [ObservableProperty] private double dcoff = 0.0;
-    [ObservableProperty] private double taus = 0.0;
-    [ObservableProperty] private double vref = 0.0;
-    [ObservableProperty] private int np = 1;
-    [ObservableProperty] private int fs = 0;
-    [ObservableProperty] private int envSwitch = 1;
-    [ObservableProperty] private int ntrp = 1;
+    public double XC { get; set; } = 0.0;
+    public double YC { get; set; } = 1.0;
+    public double XA { get; set; } = 100.0;
+    public double YA { get; set; } = 100.0;
+    public double WIREL { get; set; } = 0.85;
+    public int IWAVE { get; set; } = 2;
+    public double UIO { get; set; } = 16.0;
+    public double XPD { get; set; } = 2.0;
+    public double UIO2 { get; set; } = 0.0;
+    public double XPD2 { get; set; } = 0.0;
+    public double DELAY { get; set; } = 0.0;
+    public double FREQ { get; set; } = 5.0;
+    public double PHASE { get; set; } = 0.0;
+    public double FREQ2 { get; set; } = 0.0;
+    public double PHASE2 { get; set; } = 0.0;
+    public double AMP2 { get; set; } = 0.0;
+    public int NSINES { get; set; } = 27;
+    public double DCOFF { get; set; } = 0.0;
+    public double TAUS { get; set; } = 0.0;
+    public double VREF { get; set; } = 0.0;
+    public int NP { get; set; } = 1;
+    public int FS { get; set; } = 0;
+    public int S { get; set; } = 1;
+    public int NTRP { get; set; } = 1;
 
     // CONTROL properties
-    [ObservableProperty] private int ithr = 1;
-    [ObservableProperty] private double vth = 80.0;
-    [ObservableProperty] private int nthnode = 3;
-    [ObservableProperty] private double delt = 0.0002;
-    [ObservableProperty] private double delt2m = 4.0;
-    [ObservableProperty] private double final = 4.0;
-    [ObservableProperty] private int iprnt = 50;
+    public int ITHR { get; set; } = 1;
+    public double VTH { get; set; } = 80.0;
+    public int NTHNODE { get; set; } = 3;
+    public double DELT { get; set; } = 0.0002;
+    public double DELT2M { get; set; } = 4.0;
+    public double FINAL { get; set; } = 4.0;
+    public int IPRNT { get; set; } = 50;
 
     // Optional descriptor
-    [ObservableProperty] private string? descriptor = "SINUSOID";
-
-    // Helper method to get values in the format expected by SennRunner
-    public int NNODES => Nnodes;
-    public int NLIN1 => Nlin1;
-    public int NLIN2 => Nlin2;
-    public int NODE1 => Node1;
-    public double DIAM => Diam;
-    public double GAP => Gap;
-    public double CM => Cm;
-    public double GM => Gm;
-    public double RHOI => Rhoi;
-    public double RHOE => Rhoe;
-    public double XC => Xc;
-    public double YC => Yc;
-    public double XA => Xa;
-    public double YA => Ya;
-    public double WIREL => Wirel;
-    public int IWAVE => Iwave;
-    public double UIO => Uio;
-    public double XPD => Xpd;
-    public double UIO2 => Uio2;
-    public double XPD2 => Xpd2;
-    public double DELAY => Delay;
-    public double FREQ => Freq;
-    public double PHASE => Phase;
-    public double FREQ2 => Freq2;
-    public double PHASE2 => Phase2;
-    public double AMP2 => Amp2;
-    public int NSINES => Nsines;
-    public double DCOFF => Dcoff;
-    public double TAUS => Taus;
-    public double VREF => Vref;
-    public int NP => Np;
-    public int FS => Fs;
-    public int S => EnvSwitch;
-    public int NTRP => Ntrp;
-    public int ITHR => Ithr;
-    public double VTH => Vth;
-    public int NTHNODE => Nthnode;
-    public double DELT => Delt;
-    public double DELT2M => Delt2m;
-    public double FINAL => Final;
-    public int IPRNT => Iprnt;
-    public string? DESCRIPTOR => descriptor;
+    public string? DESCRIPTOR { get; set; } = "SINUSOID";
 }
