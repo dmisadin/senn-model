@@ -11,8 +11,8 @@
         Height="900">
 
     <Grid Margin="20" RowDefinitions="*,Auto">
-        <!-- Main content with 3 columns -->
-        <Grid Grid.Row="0" ColumnDefinitions="auto,auto,auto" ColumnSpacing="20">
+        <!-- Main content with 4 columns -->
+        <Grid Grid.Row="0" ColumnDefinitions="auto,auto,auto,*" ColumnSpacing="20">
             
             <!-- FIBER Column -->
             <Grid Grid.Column="0" RowDefinitions="Auto,*" MinWidth="160">
@@ -316,6 +316,21 @@
                     </StackPanel>
                 </ScrollViewer>
             </Grid>
+
+            <!-- CONSOLE Column -->
+            <Grid Grid.Column="3" RowDefinitions="Auto,*" MinWidth="300">
+                <TextBlock Grid.Row="0" Text="CONSOLE" FontSize="16" FontWeight="Bold" Margin="0,0,0,8"/>
+                <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+                    <TextBox Text="{Binding ConsoleOutput, Mode=OneWay}"
+                             IsReadOnly="True"
+                             TextWrapping="Wrap"
+                             FontFamily="Consolas, Courier New, monospace"
+                             Background="{DynamicResource ThemeBackgroundBrush}"
+                             Foreground="{DynamicResource ThemeForegroundBrush}"
+                             BorderThickness="0"
+                             Padding="8"/>
+                </ScrollViewer>
+            </Grid>
         </Grid>
 
         <!-- Footer with checkbox and button -->
@@ -328,10 +343,12 @@
                         HorizontalAlignment="Right"
                         Spacing="16">
                 <CheckBox Content="Use inparams.txt as input"
-                          IsChecked="{Binding ShouldUseTextFileInput, Mode=TwoWay}" />
+                          IsChecked="{Binding ShouldUseTextFileInput, Mode=TwoWay}"
+                          IsEnabled="{Binding !IsRunning}"/>
 
                 <Button Content="Run Simulation"
                         Command="{Binding RunSimulationCommand}"
+                        IsEnabled="{Binding !IsRunning}"
                         Padding="16,10"/>
             </StackPanel>
         </Border>
