@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using SENNModel.Models.Enums;
+using System.IO;
 
 namespace SENNModel.Models;
 
@@ -272,4 +273,5 @@ public class SennState
     public System.IO.TextReader InParamReader;  // unit 7
     public System.IO.TextWriter XYInterpWriter;  // corresponds to Fortran unit 2
 
+    public MembraneModel MembraneModel { get; set; } = MembraneModel.FrankenhaeuserHuxley;
 }

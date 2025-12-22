@@ -3,12 +3,19 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:vm="clr-namespace:SENNModel.ViewModels"
+        xmlns:conv="clr-namespace:SENNModel.Converters"
+        xmlns:enums="clr-namespace:SENNModel.Models.Enums"
         mc:Ignorable="d"
         x:Class="SENNModel.Views.MainWindow"
         x:DataType="vm:MainWindowViewModel"
         Title="SENN Model"
         SizeToContent="Width"
         Height="900">
+
+    <Window.Resources>
+        <conv:EnumEqualsConverter x:Key="EnumEqualsConverter"/>
+    </Window.Resources>
+
 
     <Grid Margin="20" RowDefinitions="*,Auto">
         <!-- Main content with 4 columns -->
@@ -318,18 +325,55 @@
             </Grid>
 
             <!-- CONSOLE Column -->
-            <Grid Grid.Column="3" RowDefinitions="Auto,*" MinWidth="300">
-                <TextBlock Grid.Row="0" Text="CONSOLE" FontSize="16" FontWeight="Bold" Margin="0,0,0,8"/>
-                <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
-                    <TextBox Text="{Binding ConsoleOutput, Mode=OneWay}"
-                             IsReadOnly="True"
-                             TextWrapping="Wrap"
-                             FontFamily="Consolas, Courier New, monospace"
-                             Background="{DynamicResource ThemeBackgroundBrush}"
-                             Foreground="{DynamicResource ThemeForegroundBrush}"
-                             BorderThickness="0"
-                             Padding="8"/>
-                </ScrollViewer>
+            <Grid Grid.Column="3" Grid.RowDefinitions="*, Auto" MinWidth="300">
+                <Grid Grid.Row="0" RowDefinitions="Auto, *">
+                    <TextBlock Grid.Row="0" Text="CONSOLE" FontSize="16" FontWeight="Bold" Margin="0,0,0,8"/>
+                    <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+                        <TextBox Text="{Binding ConsoleOutput, Mode=OneWay}"
+                                 IsReadOnly="True"
+                                 TextWrapping="Wrap"
+                                 FontFamily="Consolas, Courier New, monospace"
+                                 Background="{DynamicResource ThemeBackgroundBrush}"
+                                 Foreground="{DynamicResource ThemeForegroundBrush}"
+                                 BorderThickness="1"
+                                 Padding="8"/>
+                    </ScrollViewer>        
+                </Grid>
+                <StackPanel Grid.Row="1" Spacing="4" Margin="0,8,0,0">
+                    <TextBlock Text="Membrane Model"
+                               FontWeight="Bold"
+                               Margin="0,0,0,4"/>
+
+                    <RadioButton Content="Frankenhaeuser-Huxley (FH)"
+                                 GroupName="MembraneModel"
+                                 IsChecked="{Binding InputParams.MembraneModel,
+                                                     Mode=TwoWay,
+                                                     Converter={StaticResource EnumEqualsConverter},
+                                                     ConverterParameter={x:Static enums:MembraneModel.FrankenhaeuserHuxley}}" />
+
+                    <RadioButton Content="Hodgkin-Huxley (HH)"
+                                 GroupName="MembraneModel"
+                                 IsChecked="{Binding InputParams.MembraneModel,
+                                                     Mode=TwoWay,
+                                                     Converter={StaticResource EnumEqualsConverter},
+                                                     ConverterParameter={x:Static enums:MembraneModel.HodgkinHuxley}}" />
+
+                    <RadioButton Content="Chiu-Ritchie-Rogart-Stagg (CRRS)"
+                                 GroupName="MembraneModel"
+                                 IsChecked="{Binding InputParams.MembraneModel,
+                                                     Mode=TwoWay,
+                                                     Converter={StaticResource EnumEqualsConverter},
+                                                     ConverterParameter={x:Static enums:MembraneModel.ChiuRitchieRogartStagg}}" />
+
+                    <RadioButton Content="McIntyre-Richardson-Grill (MRG)"
+                                 GroupName="MembraneModel"
+                                 IsChecked="{Binding InputParams.MembraneModel,
+                                                     Mode=TwoWay,
+                                                     Converter={StaticResource EnumEqualsConverter},
+                                                     ConverterParameter={x:Static enums:MembraneModel.McIntyreRichardsonGrill}}" />
+                </StackPanel>
+
+
             </Grid>
         </Grid>
 
@@ -343,12 +387,10 @@
                         HorizontalAlignment="Right"
                         Spacing="16">
                 <CheckBox Content="Use inparams.txt as input"
-                          IsChecked="{Binding ShouldUseTextFileInput, Mode=TwoWay}"
-                          IsEnabled="{Binding !IsRunning}"/>
+                          IsChecked="{Binding ShouldUseTextFileInput, Mode=TwoWay}" />
 
                 <Button Content="Run Simulation"
                         Command="{Binding RunSimulationCommand}"
-                        IsEnabled="{Binding !IsRunning}"
                         Padding="16,10"/>
             </StackPanel>
         </Border>

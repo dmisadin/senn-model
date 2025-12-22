@@ -1,11 +1,11 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+﻿using Avalonia.Threading;
+using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using Avalonia.Threading;
+using SENNModel.Models;
 using System;
 using System.IO;
 using System.Text;
 using System.Threading.Tasks;
-using SENNModel.Models;
 
 namespace SENNModel.ViewModels;
 

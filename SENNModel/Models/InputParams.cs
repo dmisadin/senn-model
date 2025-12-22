@@ -1,3 +1,5 @@
+using SENNModel.Models.Enums;
+
 namespace SENNModel.Models;
 
 public class InputParams
@@ -51,4 +53,7 @@ public class InputParams
 
     // Optional descriptor
     public string? DESCRIPTOR { get; set; } = "SINUSOID";
+
+    // Membrane model selection
+    public MembraneModel MembraneModel { get; set; } = MembraneModel.FrankenhaeuserHuxley;
 }
