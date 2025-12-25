@@ -1,4 +1,5 @@
 ﻿using SENNModel.Models.Enums;
+using System;
 using System.IO;
 
 namespace SENNModel.Models;
@@ -274,4 +275,5 @@ public class SennState
     public System.IO.TextWriter XYInterpWriter;  // corresponds to Fortran unit 2
 
     public MembraneModel MembraneModel { get; set; } = MembraneModel.FrankenhaeuserHuxley;
+    public DateTime StartedAt { get; set; } = DateTime.Now;
 }

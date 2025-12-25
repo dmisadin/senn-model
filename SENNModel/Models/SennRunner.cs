@@ -1,9 +1,9 @@
-﻿using SENNModel.Models.Enums;
+﻿using ClosedXML.Excel;
+using SENNModel.Models.Enums;
 using System;
+using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
-using ClosedXML.Excel;
-using System.Collections.Generic;
 using System.Linq;
 
 namespace SENNModel.Models;
@@ -121,9 +121,12 @@ public static class SennRunner
 
         // OPEN(UNIT=66,FILE='data.out',...)
         // STATUS='UNKNOWN' ≈ create or overwrite
-        state.DataOutWriter = new StreamWriter("data.out", append: false);
-        state.Out17 = new StreamWriter("plot_17.txt");
-        state.Out30 = new StreamWriter("plot_30.txt");
+        string membraneModel = state.MembraneModel.GetDescription();
+        string startedAt = state.StartedAt.ToString("yyyy-MM-dd-HH-mm.ss");
+
+        state.DataOutWriter = new StreamWriter($"data_{startedAt}_{membraneModel}.out"); // data.out
+        state.Out17 = new StreamWriter($"plot_{startedAt}_17_{membraneModel}.txt"); // fort.17
+        state.Out30 = new StreamWriter($"plot_{startedAt}_30_{membraneModel}.txt"); // fort.30
 
         return state;
     }
@@ -173,11 +176,15 @@ public static class SennRunner
         // Generate Excel plots after closing the text files
         try
         {
-            GenerateExcelPlots();
+            var startedAt = state.StartedAt;
+            string membraneModel = state.MembraneModel.GetDescription();
+            string outputFileName = $"plot_{startedAt.ToString("yyyy-MM-dd-HH-mm.ss")}_{membraneModel}.xlsx";
+
+            GenerateExcelPlots(outputFileName);
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"Warning: Failed to generate Excel plots: {ex.Message}");
+            Console.WriteLine($"Error: Failed to generate Excel plots: {ex.Message}");
         }
     }
 
@@ -3438,7 +3445,7 @@ public static class SennRunner
     /// Generate Excel file with plots from plot_17.txt and plot_30.txt
     /// Each iteration is placed in separate column pairs, and all iterations are plotted on a single chart
     /// </summary>
-    public static void GenerateExcelPlots(string plot17File = "plot_17.txt", string plot30File = "plot_30.txt", string outputFile = "plots.xlsx")
+    public static void GenerateExcelPlots(string outputFile = "plots.xlsx", string plot17File = "plot_17.txt", string plot30File = "plot_30.txt")
     {
         if (!File.Exists(plot17File) && !File.Exists(plot30File))
         {
@@ -3507,6 +3514,8 @@ public static class SennRunner
                     if (double.TryParse(parts[0], NumberStyles.Float, ci, out double x) &&
                         double.TryParse(parts[1], NumberStyles.Float, ci, out double y))
                     {
+                        if (x == 5000 && y == 5000)
+                            continue;
                         // Check for sentinel value "0 0" that marks start of new iteration
                         if (Math.Abs(x) < 1e-10 && Math.Abs(y) < 1e-10)
                         {
