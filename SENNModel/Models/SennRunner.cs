@@ -19,7 +19,7 @@ public static class SennRunner
 
         // Apply input parameters to state
         ApplyInputParamsToState(state, inputParams);
-
+        InitializeOutputFiles(state);
         // Main loop: corresponds to label 3333 (start of run)
         // Fortran: GOTO 3333 can restart from the beginning
         while (true)
@@ -75,6 +75,7 @@ public static class SennRunner
                     Console.WriteLine("HIT EOF ON INPUT");
                     break;
                 }
+                InitializeOutputFiles(state);
 
                 RunNextAction? nextAction = ExecuteSimulationStep(state);
                 if (nextAction == null)
@@ -119,8 +120,11 @@ public static class SennRunner
         // IRUN = 0 ! run counter
         state.IRUN = 0;
 
-        // OPEN(UNIT=66,FILE='data.out',...)
-        // STATUS='UNKNOWN' ≈ create or overwrite
+        return state;
+    }
+
+    private static void InitializeOutputFiles(SennState state)
+    {
         string membraneModel = state.MembraneModel.GetDescription();
         string startedAt = state.StartedAt.ToString("yyyy-MM-dd-HH-mm.ss");
 
@@ -135,8 +139,6 @@ public static class SennRunner
         state.DataOutFileName = dataOutFileName;
         state.Out17FileName = out17FileName;
         state.Out30FileName = out30FileName;
-
-        return state;
     }
 
     /// <summary>
