@@ -1,5 +1,6 @@
 ﻿using ClosedXML.Excel;
 using SENNModel.Models.Enums;
+using SENNModel.Models.IO;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -8,12 +9,19 @@ using System.Linq;
 
 namespace SENNModel.Models;
 
-public static class SennRunner
+public class SennRunner
 {
+    private readonly FileImporter fileImporter;
+
+    public SennRunner(FileImporter fileImporter)
+    {
+        this.fileImporter = fileImporter;
+    }
+
     /// <summary>
     /// Run simulation with parameters from InputParams (GUI input)
     /// </summary>
-    public static void Run(InputParams inputParams)
+    public void Run(InputParams inputParams)
     {
         var state = InitializeSimulationState();
 
@@ -53,7 +61,7 @@ public static class SennRunner
     /// <summary>
     /// Run simulation with parameters from file (original behavior)
     /// </summary>
-    public static void Run(MembraneModel membraneModel = MembraneModel.FrankenhaeuserHuxley)
+    public void Run(MembraneModel membraneModel = MembraneModel.FrankenhaeuserHuxley)
     {
         var state = InitializeSimulationState();
 
@@ -61,6 +69,8 @@ public static class SennRunner
         // => open existing file for reading
         state.InParamReader = new StreamReader("inparam.txt");
         state.MembraneModel = membraneModel;
+
+        InitializeOutputFiles(state);
 
         // Main loop: corresponds to label 3333 (start of run)
         // Fortran: GOTO 3333 can restart from the beginning
@@ -70,13 +80,16 @@ public static class SennRunner
             {
                 // Label 1: Read input parameters (with EOF handling)
                 // Fortran: READ(7,6666,END=5000)MES2
-                if (!ReadInputParameters(state))
+                InputParams? inputParams = fileImporter.TryReadInputParamsFromFile(state.InParamReader);
+
+                if (inputParams == null)
                 {
                     // EOF reached (label 5000)
                     Console.WriteLine("HIT EOF ON INPUT");
                     break;
                 }
-                InitializeOutputFiles(state);
+
+                ApplyInputParamsToState(state, inputParams);
 
                 RunNextAction? nextAction = ExecuteSimulationStep(state);
                 if (nextAction == null)
@@ -94,7 +107,7 @@ public static class SennRunner
                     // This is already handled by the loop, but we need to skip re-reading input
                     continue;
                 }
-                else if (nextAction == RunNextAction.RestartFullRun)
+                else if (nextAction == RunNextAction.RestartFullRun && inputParams == null)
                 {
                     // GOTO 3333: restart from beginning (read new input)
                     continue;
@@ -114,7 +127,7 @@ public static class SennRunner
     /// <summary>
     /// Initialize simulation state and open output files
     /// </summary>
-    private static SennState InitializeSimulationState()
+    private SennState InitializeSimulationState()
     {
         var state = new SennState();
 
@@ -124,10 +137,10 @@ public static class SennRunner
         return state;
     }
 
-    private static void InitializeOutputFiles(SennState state)
+    private void InitializeOutputFiles(SennState state)
     {
         string membraneModel = state.MembraneModel.GetDescription();
-        string startedAt = state.StartedAt.ToString("yyyy-MM-dd-HH-mm.ss");
+        string startedAt = state.StartedAt.ToString("yyyy-MM-dd-HH-mm-ss.ss");
 
         string dataOutFileName = $"data_{startedAt}_{membraneModel}.out";
         string out17FileName = $"plot_{startedAt}_17_{membraneModel}.txt";
@@ -146,7 +159,7 @@ public static class SennRunner
     /// Execute a single simulation step (from label 3333 to end of run)
     /// Returns the next action to take, or null if an error occurred
     /// </summary>
-    private static RunNextAction? ExecuteSimulationStep(SennState state)
+    private RunNextAction? ExecuteSimulationStep(SennState state)
     {
         // Label 3333: start of run
         InitializeRun(state);
@@ -177,7 +190,7 @@ public static class SennRunner
     /// <summary>
     /// Clean up simulation state and close files
     /// </summary>
-    private static void CleanupSimulationState(SennState state)
+    private void CleanupSimulationState(SennState state)
     {
         state.DataOutWriter?.Dispose();
         state.InParamReader?.Dispose();
@@ -199,7 +212,7 @@ public static class SennRunner
         }
     }
 
-    private static void ApplyInputParamsToState(SennState state, InputParams input)
+    private void ApplyInputParamsToState(SennState state, InputParams input)
     {
         // FIBER
         state.NNODES = (short)input.NNODES;
@@ -250,7 +263,7 @@ public static class SennRunner
         state.MembraneModel = input.MembraneModel;
     }
 
-    private static void InitializeRun(SennState state)
+    private void InitializeRun(SennState state)
     {
         // This corresponds to label 3333 "start of run"
         state.CROSS = false;
@@ -265,7 +278,7 @@ public static class SennRunner
         }
     }
 
-    private static void SetPhysicalConstants(SennState state)
+    private void SetPhysicalConstants(SennState state)
     {
         // Gas constant, temperature, Faraday constant
         state.R = 8.3144;
@@ -298,7 +311,7 @@ public static class SennRunner
         state.DIAMH = 0.0;
     }
 
-    private static void SetIonicCurrentParameters(SennState state)
+    private void SetIonicCurrentParameters(SennState state)
     {
         // ===== Alpha/Beta Coefficients (CA and CB arrays) =====
         // CA(x,y), CB(x,y) correspond to Fortran CA(1..4, 1..3), CB(1..4,1..3)
@@ -348,7 +361,7 @@ public static class SennRunner
         state.NNGTT = 0;
     }
 
-    private static void SetPiConstants(SennState state)
+    private void SetPiConstants(SennState state)
     {
         // Fortran DATA PI/3.141593/
         state.PI = 3.141593;
@@ -362,7 +375,7 @@ public static class SennRunner
 
 
 
-    public static bool ReadInputParameters(SennState state)
+    public bool ReadInputParameters(SennState state)
     {
         var reader = state.InParamReader
                      ?? throw new InvalidOperationException("InParamReader is not initialized.");
@@ -451,7 +464,7 @@ public static class SennRunner
         return true; // Successfully read parameters
     }
 
-    private static void ParseFiberField(SennState state, string name, string value, IFormatProvider ci)
+    private void ParseFiberField(SennState state, string name, string value, IFormatProvider ci)
     {
         switch (name)
         {
@@ -488,7 +501,7 @@ public static class SennRunner
         }
     }
 
-    private static void ParseStimulusField(SennState state, string name, string value, IFormatProvider ci)
+    private void ParseStimulusField(SennState state, string name, string value, IFormatProvider ci)
     {
         switch (name)
         {
@@ -567,7 +580,7 @@ public static class SennRunner
         }
     }
 
-    private static void ParseControlField(SennState state, string name, string value, IFormatProvider ci)
+    private void ParseControlField(SennState state, string name, string value, IFormatProvider ci)
     {
         switch (name)
         {
@@ -598,7 +611,7 @@ public static class SennRunner
 
 
 
-    private static void ValidateSettingsAndPrintHeader(SennState state)
+    private void ValidateSettingsAndPrintHeader(SennState state)
     {
         var w = state.DataOutWriter;
 
@@ -648,7 +661,7 @@ public static class SennRunner
         }
     }
 
-    private static void ConfigureProbeAndWaveform(SennState state)
+    private void ConfigureProbeAndWaveform(SennState state)
     {
         var w = state.DataOutWriter;
         var ci = CultureInfo.InvariantCulture;
@@ -745,7 +758,7 @@ public static class SennRunner
         // are already filled if present in the file and TT=2.
     }
 
-    private static void ImportExternalArrays(SennState state)
+    private void ImportExternalArrays(SennState state)
     {
         var ci = CultureInfo.InvariantCulture;
 
@@ -824,7 +837,7 @@ public static class SennRunner
         // IWAVE = 13 (XIN/YIN import) will be handled later where that code appears.
     }
 
-    private static void ImportXYForWaveform13(SennState state)
+    private void ImportXYForWaveform13(SennState state)
     {
         if (state.IWAVE != 13)
             return;
@@ -918,7 +931,7 @@ public static class SennRunner
     /// When you provide the Fortran INTERP code, we can translate the
     /// actual interpolation logic here.
     /// </summary>
-    private static void Interp(SennState state)
+    private void Interp(SennState state)
     {
         // Fortran arguments:
         //   XIN, YIN, DELTIN, LENIN, NTRP, XCAL, YCAL, YINTERP, DELTOT, LENOT
@@ -1006,7 +1019,7 @@ public static class SennRunner
         Console.WriteLine("Output file named XYINTERP");
     }
 
-    private static void PostWaveformSetup(SennState state)
+    private void PostWaveformSetup(SennState state)
     {
         Console.WriteLine($"NNODES {state.NNODES}");
 
@@ -1015,7 +1028,7 @@ public static class SennRunner
         state.URATIO = 1.0;
     }
 
-    private static void ConfigureWaveformParameters(SennState state)
+    private void ConfigureWaveformParameters(SennState state)
     {
         // ----- IWAVE = 6: force NP = 2 -----
         if (state.IWAVE == 6)
@@ -1080,7 +1093,7 @@ public static class SennRunner
         }
     }
 
-    private static void WriteParameterSummary(SennState state)
+    private void WriteParameterSummary(SennState state)
     {
         var w = state.DataOutWriter ?? throw new InvalidOperationException("DataOutWriter not initialized.");
         var ci = CultureInfo.InvariantCulture;
@@ -1207,7 +1220,7 @@ public static class SennRunner
         ComputePulseTimes(state);
     }
 
-    private static void ComputePulseTimes(SennState state)
+    private void ComputePulseTimes(SennState state)
     {
         // Fortran: IF(IWAVE .NE. 6)THEN
         if (state.IWAVE != 6)
@@ -1238,7 +1251,7 @@ public static class SennRunner
         }
     }
 
-    private static void SetupGeometryAndRunParameters(SennState state)
+    private void SetupGeometryAndRunParameters(SennState state)
     {
         // ----- VARY IONIC NON LINEAR PARAMETERS DEPENDING ON GM -----
         // XMFACT = GM / 30.365
@@ -1358,7 +1371,7 @@ public static class SennRunner
         // based on UIO2/UIO in WriteParameterSummary / waveform setup.
     }
 
-    private static void SetupWaveformDiagnosticsAndInitialAmplitude(SennState state)
+    private void SetupWaveformDiagnosticsAndInitialAmplitude(SennState state)
     {
         var w = state.DataOutWriter;
 
@@ -1421,7 +1434,7 @@ public static class SennRunner
     }
 
     // Helper for label 11 sinusoid modes
-    private static void HandleSinusoidModes(SennState state)
+    private void HandleSinusoidModes(SennState state)
     {
         var w = state.DataOutWriter;
         var ci = CultureInfo.InvariantCulture;
@@ -1467,7 +1480,7 @@ public static class SennRunner
     }
 
 
-    private static void InitializeStateVectorY(SennState state)
+    private void InitializeStateVectorY(SennState state)
     {
         // K = 2*NON + 1
         state.K = 2 * state.NON + 1;
@@ -1536,7 +1549,7 @@ public static class SennRunner
         }
     }
 
-    private static void ComputeExternalPotentialsAndInitDerivatives(SennState state)
+    private void ComputeExternalPotentialsAndInitDerivatives(SennState state)
     {
         var w = state.DataOutWriter;
         var ci = CultureInfo.InvariantCulture;
@@ -1710,7 +1723,7 @@ public static class SennRunner
         state.DERY[state.NON + 1] = 1.0;
     }
 
-    private static void WriteVoltageCurrentHeaders(SennState state)
+    private void WriteVoltageCurrentHeaders(SennState state)
     {
         var w = state.DataOutWriter;
         if (w == null) return;
@@ -1732,7 +1745,7 @@ public static class SennRunner
         w.WriteLine();
     }
 
-    private static bool RunSingleIterationAndMaybeUpdateUIO(SennState state)
+    private bool RunSingleIterationAndMaybeUpdateUIO(SennState state)
     {
         var w = state.DataOutWriter;
         var ci = CultureInfo.InvariantCulture;
@@ -1869,7 +1882,7 @@ public static class SennRunner
     }
 
 
-    private static void RunThresholdSearch(SennState state)
+    private void RunThresholdSearch(SennState state)
     {
         // Initialize threshold search counters ONCE before the iteration loop
         // Fortran lines 671-674: IA=0, IB=0, YMAX=-1e38, YMIN=1e38
@@ -1893,7 +1906,7 @@ public static class SennRunner
         while (again);
     }
 
-    private static void PrintIterativeSummary(SennState state)
+    private void PrintIterativeSummary(SennState state)
     {
         var w = state.DataOutWriter;
         var ci = System.Globalization.CultureInfo.InvariantCulture;
@@ -1918,7 +1931,7 @@ public static class SennRunner
         }
     }
 
-    private static RunNextAction EndOfRunAndDecideNext(SennState state)
+    private RunNextAction EndOfRunAndDecideNext(SennState state)
     {
         var w = state.DataOutWriter;
 
@@ -1992,7 +2005,7 @@ public static class SennRunner
     }
 
 
-    private static void FCT(double x, SennState s)
+    private void FCT(double x, SennState s)
     {
         double[] Y = s.Y, DERY = s.DERY, PRMT = s.PRMT;
         double[] TIM = s.TIM, EPOT = s.EPOT, EPT = s.EPT;
@@ -2028,7 +2041,7 @@ public static class SennRunner
     }
 
 
-    private static double ComputeStimulusMultiplier(double x, SennState s)
+    private double ComputeStimulusMultiplier(double x, SennState s)
     {
         switch (s.IWAVE)
         {
@@ -2088,13 +2101,13 @@ public static class SennRunner
         }
     }
 
-    private static double SINEIN(double x, int i, SennState s)
+    private double SINEIN(double x, int i, SennState s)
     {
         return s.SINEIN2[i, 1] * Math.Sin(s.SINEIN2[i, 2] * x + s.SINEIN2[i, 3]);
     }
 
 
-    private static void ApplyPrimaryEPT(double XMULT, double x, SennState s)
+    private void ApplyPrimaryEPT(double XMULT, double x, SennState s)
     {
         for (int i = 1; i <= s.NNODES; i++)
         {
@@ -2115,14 +2128,14 @@ public static class SennRunner
         }
     }
 
-    private static bool IsInsidePrimaryPulse(double x, SennState s)
+    private bool IsInsidePrimaryPulse(double x, SennState s)
     {
         if (x < s.XPD) return true;
         if (x <= s.XPD + s.DELAY) return true;
         return false;
     }
 
-    private static bool IsInsideSecondaryPulse(double x, SennState s)
+    private bool IsInsideSecondaryPulse(double x, SennState s)
     {
         if (s.IWAVE != 6 && s.IWAVE != 8 && s.IWAVE != 9) return false;
 
@@ -2136,7 +2149,7 @@ public static class SennRunner
         return false;
     }
 
-    private static void ApplySecondaryEPT(double XMULT, double x, SennState s)
+    private void ApplySecondaryEPT(double XMULT, double x, SennState s)
     {
         for (int i = 1; i <= s.NNODES; i++)
         {
@@ -2146,7 +2159,7 @@ public static class SennRunner
         }
     }
 
-    private static double ComputeExternalPotentialAtNode(int i, double scale, double XMULT, SennState s)
+    private double ComputeExternalPotentialAtNode(int i, double scale, double XMULT, SennState s)
     {
         // Implements the FS=0,1,2 logic (point, uniform, imported)
         // same equations as your Fortran, but as a pure function
@@ -2169,7 +2182,7 @@ public static class SennRunner
     }
 
 
-    private static void ComputeTIM(double x, double XMULT, bool includeEPT, SennState s)
+    private void ComputeTIM(double x, double XMULT, bool includeEPT, SennState s)
     {
         int JT = 2 * s.NON;
         int NN = s.NNODES;
@@ -2195,14 +2208,14 @@ public static class SennRunner
                                 s.EPT[i - 1] - 2 * s.EPT[i] + s.EPT[i + 1]);
     }
 
-    private static void ComputeLinearDvDt(SennState s)
+    private void ComputeLinearDvDt(SennState s)
     {
         int JT = 2 * s.NON + 1;
         for (int i = 1; i <= JT; i++)
             s.DERY[i] = (s.TIM[i] - s.CGM * s.Y[i]) / s.CCM;
     }
 
-    private static void ComputeNonlinearNodes(SennState s)
+    private void ComputeNonlinearNodes(SennState s)
     {
         // No nonlinear nodes
         if (s.NLIN1 <= 0 || s.NLIN1 > s.NLIN2)
@@ -2230,7 +2243,7 @@ public static class SennRunner
     }
 
     // Extract existing implementation to this method
-    private static void ComputeNonlinearNodes_FH(SennState s)
+    private void ComputeNonlinearNodes_FH(SennState s)
     {
         // No nonlinear nodes
         if (s.NLIN1 <= 0 || s.NLIN1 > s.NLIN2)
@@ -2350,7 +2363,7 @@ public static class SennRunner
     }
 
     // Hodgkin-Huxley model implementation (uses h, m, n - no persistent sodium)
-    private static void ComputeNonlinearNodes_HH(SennState s)
+    private void ComputeNonlinearNodes_HH(SennState s)
     {
         // No nonlinear nodes
         if (s.NLIN1 <= 0 || s.NLIN1 > s.NLIN2)
@@ -2511,7 +2524,7 @@ public static class SennRunner
     }
 
     // Chiu-Ritchie-Rogart-Stagg model implementation (mammalian myelinated axons)
-    private static void ComputeNonlinearNodes_CRRS(SennState s)
+    private void ComputeNonlinearNodes_CRRS(SennState s)
     {
         // No nonlinear nodes
         if (s.NLIN1 <= 0 || s.NLIN1 > s.NLIN2)
@@ -2670,7 +2683,7 @@ public static class SennRunner
     }
 
     // McIntyre-Richardson-Grill model implementation (human peripheral nerve fibers)
-    private static void ComputeNonlinearNodes_MRG(SennState s)
+    private void ComputeNonlinearNodes_MRG(SennState s)
     {
         // No nonlinear nodes
         if (s.NLIN1 <= 0 || s.NLIN1 > s.NLIN2)
@@ -2845,7 +2858,7 @@ public static class SennRunner
         }
     }
 
-    public static void OutputStep(double x, SennState s, int iHalf, int nDim)
+    public void OutputStep(double x, SennState s, int iHalf, int nDim)
     {
         var w66 = s.DataOutWriter;
         var w17 = s.Out17;
@@ -3057,7 +3070,7 @@ public static class SennRunner
         }
     }
 
-    private static void WriteVoltages(TextWriter? w, double x, SennState s, int node1, int node2)
+    private void WriteVoltages(TextWriter? w, double x, SennState s, int node1, int node2)
     {
         if (w == null) return;
         var ci = System.Globalization.CultureInfo.InvariantCulture;
@@ -3073,7 +3086,7 @@ public static class SennRunner
         w.WriteLine();
     }
 
-    private static void WriteSeries(TextWriter? w, string label, double x, double[] arr, int node1, int node2)
+    private void WriteSeries(TextWriter? w, string label, double x, double[] arr, int node1, int node2)
     {
         if (w == null) return;
         var ci = System.Globalization.CultureInfo.InvariantCulture;
@@ -3092,7 +3105,7 @@ public static class SennRunner
         w.WriteLine();
     }
 
-    private static void UpdateNodeThresholdFlags(SennState s)
+    private void UpdateNodeThresholdFlags(SennState s)
     {
         for (int i = 1; i <= 6; i++)
         {
@@ -3102,7 +3115,7 @@ public static class SennRunner
     }
 
 
-    public static void RKGS(SennState s, int nDim)
+    public void RKGS(SennState s, int nDim)
     {
         // Aliases for convenience
         double[] Y = s.Y;
@@ -3456,7 +3469,7 @@ public static class SennRunner
     /// Generate Excel file with plots from plot_17.txt and plot_30.txt
     /// Each iteration is placed in separate column pairs, and all iterations are plotted on a single chart
     /// </summary>
-    public static void GenerateExcelPlots(string outputFile = "plots.xlsx", string plot17File = "plot_17.txt", string plot30File = "plot_30.txt")
+    public void GenerateExcelPlots(string outputFile = "plots.xlsx", string plot17File = "plot_17.txt", string plot30File = "plot_30.txt")
     {
         if (!File.Exists(plot17File) && !File.Exists(plot30File))
         {
@@ -3504,7 +3517,7 @@ public static class SennRunner
     /// <summary>
     /// Parse a plot file, splitting iterations by the sentinel "0 0"
     /// </summary>
-    private static List<List<(double X, double Y)>> ParsePlotFile(string filename, CultureInfo ci)
+    private List<List<(double X, double Y)>> ParsePlotFile(string filename, CultureInfo ci)
     {
         var iterations = new List<List<(double X, double Y)>>();
         var currentIteration = new List<(double X, double Y)>();
@@ -3558,7 +3571,7 @@ public static class SennRunner
     /// <summary>
     /// Create a worksheet with plot data
     /// </summary>
-    private static void CreatePlotWorksheet(XLWorkbook workbook, List<List<(double X, double Y)>> iterations, string sheetName, string xAxisTitle, string yAxisTitle)
+    private void CreatePlotWorksheet(XLWorkbook workbook, List<List<(double X, double Y)>> iterations, string sheetName, string xAxisTitle, string yAxisTitle)
     {
         var worksheet = workbook.Worksheets.Add(sheetName);
 
@@ -3643,7 +3656,7 @@ public static class SennRunner
     /// <summary>
     /// Convert column number (1-based) to Excel column letter (A, B, C, ..., Z, AA, AB, ...)
     /// </summary>
-    private static string GetColumnLetter(int columnNumber)
+    private string GetColumnLetter(int columnNumber)
     {
         string columnLetter = "";
         while (columnNumber > 0)

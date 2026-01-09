@@ -22,6 +22,12 @@ public partial class MainWindowViewModel : ViewModelBase
 
     private readonly object consoleLock = new object();
 
+    private readonly SennRunner sennRunner;
+    public MainWindowViewModel(SennRunner sennRunner)
+    {
+        this.sennRunner = sennRunner;
+    }
+
     [RelayCommand]
     private async Task RunSimulation()
     {
@@ -45,9 +51,9 @@ public partial class MainWindowViewModel : ViewModelBase
                 try
                 {
                     if (ShouldUseTextFileInput)
-                        SennRunner.Run(InputParams.MembraneModel);
+                        sennRunner.Run(InputParams.MembraneModel);
                     else
-                        SennRunner.Run(InputParams);
+                        sennRunner.Run(InputParams);
                 }
                 finally
                 {
