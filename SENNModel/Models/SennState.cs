@@ -274,6 +274,10 @@ public class SennState
     public System.IO.TextReader InParamReader;  // unit 7
     public System.IO.TextWriter XYInterpWriter;  // corresponds to Fortran unit 2
 
+    public string DataOutFileName = "data.out";
+    public string Out17FileName = "fort.17";
+    public string Out30FileName = "fort.30";
+
     public MembraneModel MembraneModel { get; set; } = MembraneModel.FrankenhaeuserHuxley;
     public DateTime StartedAt { get; set; } = DateTime.Now;
 }

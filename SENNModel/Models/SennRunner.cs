@@ -124,9 +124,17 @@ public static class SennRunner
         string membraneModel = state.MembraneModel.GetDescription();
         string startedAt = state.StartedAt.ToString("yyyy-MM-dd-HH-mm.ss");
 
-        state.DataOutWriter = new StreamWriter($"data_{startedAt}_{membraneModel}.out"); // data.out
-        state.Out17 = new StreamWriter($"plot_{startedAt}_17_{membraneModel}.txt"); // fort.17
-        state.Out30 = new StreamWriter($"plot_{startedAt}_30_{membraneModel}.txt"); // fort.30
+        string dataOutFileName = $"data_{startedAt}_{membraneModel}.out";
+        string out17FileName = $"plot_{startedAt}_17_{membraneModel}.txt";
+        string out30FileName = $"plot_{startedAt}_30_{membraneModel}.txt";
+
+        state.DataOutWriter = new StreamWriter(dataOutFileName); // data.out
+        state.Out17 = new StreamWriter(out17FileName); // fort.17
+        state.Out30 = new StreamWriter(out30FileName); // fort.30
+
+        state.DataOutFileName = dataOutFileName;
+        state.Out17FileName = out17FileName;
+        state.Out30FileName = out30FileName;
 
         return state;
     }
@@ -180,7 +188,7 @@ public static class SennRunner
             string membraneModel = state.MembraneModel.GetDescription();
             string outputFileName = $"plot_{startedAt.ToString("yyyy-MM-dd-HH-mm.ss")}_{membraneModel}.xlsx";
 
-            GenerateExcelPlots(outputFileName);
+            GenerateExcelPlots(outputFileName, state.Out17FileName, state.Out30FileName);
         }
         catch (Exception ex)
         {
