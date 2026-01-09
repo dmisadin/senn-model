@@ -53,13 +53,14 @@ public static class SennRunner
     /// <summary>
     /// Run simulation with parameters from file (original behavior)
     /// </summary>
-    public static void Run()
+    public static void Run(MembraneModel membraneModel = MembraneModel.FrankenhaeuserHuxley)
     {
         var state = InitializeSimulationState();
 
         // OPEN(UNIT=7,FILE='inparam.txt',STATUS='OLD',ACCESS='SEQUENTIAL')
         // => open existing file for reading
         state.InParamReader = new StreamReader("inparam.txt");
+        state.MembraneModel = membraneModel;
 
         // Main loop: corresponds to label 3333 (start of run)
         // Fortran: GOTO 3333 can restart from the beginning

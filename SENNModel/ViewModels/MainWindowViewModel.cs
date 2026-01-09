@@ -45,7 +45,7 @@ public partial class MainWindowViewModel : ViewModelBase
                 try
                 {
                     if (ShouldUseTextFileInput)
-                        SennRunner.Run();
+                        SennRunner.Run(InputParams.MembraneModel);
                     else
                         SennRunner.Run(InputParams);
                 }
