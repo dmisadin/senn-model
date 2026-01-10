@@ -1,7 +1,9 @@
 ﻿using Avalonia;
 using Microsoft.Extensions.DependencyInjection;
 using SENNModel.Models;
+using SENNModel.Models.Enums;
 using SENNModel.Models.IO;
+using SENNModel.Models.Simulations;
 using SENNModel.ViewModels;
 using SENNModel.Views;
 using System;
@@ -25,11 +27,10 @@ internal sealed class Program
     {
         var services = new ServiceCollection();
 
-        // Register services (your app logic)
         services.AddSingleton<SennRunner>();
-        // services.AddSingleton<IProjectStorage, ProjectFileService>();
-        // services.AddSingleton<IMyCalculator, MyCalculator>();
         services.AddScoped<FileImporter>();
+        services.AddKeyedTransient<ISimulation, FrankenhaeuserHuxleySimulation>(MembraneModel.FrankenhaeuserHuxley);
+        services.AddKeyedTransient<ISimulation, HodgkinHuxleySimulation>(MembraneModel.HodgkinHuxley);
 
         // Register ViewModels
         services.AddSingleton<MainWindowViewModel>();
