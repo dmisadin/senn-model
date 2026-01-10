@@ -1,6 +1,8 @@
 ﻿using ClosedXML.Excel;
+using Microsoft.Extensions.DependencyInjection;
 using SENNModel.Models.Enums;
 using SENNModel.Models.IO;
+using SENNModel.Models.Simulations;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -11,10 +13,14 @@ namespace SENNModel.Models;
 
 public class SennRunner
 {
+    private readonly IServiceProvider serviceProvider;
     private readonly FileImporter fileImporter;
+    private ISimulation? simulationMethod;
 
-    public SennRunner(FileImporter fileImporter)
+    public SennRunner(IServiceProvider serviceProvider,
+                    FileImporter fileImporter)
     {
+        this.serviceProvider = serviceProvider;
         this.fileImporter = fileImporter;
     }
 
@@ -25,7 +31,8 @@ public class SennRunner
     {
         var state = InitializeSimulationState();
 
-        // Apply input parameters to state
+        this.simulationMethod = serviceProvider.GetRequiredKeyedService<ISimulation>(state.MembraneModel);
+
         ApplyInputParamsToState(state, inputParams);
         InitializeOutputFiles(state);
         // Main loop: corresponds to label 3333 (start of run)
@@ -37,7 +44,7 @@ public class SennRunner
                 // Parameters already applied, skip file reading
                 state.Descriptor = inputParams.DESCRIPTOR ?? "SINUSOID";
 
-                if (ExecuteSimulationStep(state) == RunNextAction.Stop)
+                if (this.simulationMethod.ExecuteSimulationStep(state) == RunNextAction.Stop)
                 {
                     break;
                 }
@@ -70,6 +77,8 @@ public class SennRunner
         state.InParamReader = new StreamReader("inparam.txt");
         state.MembraneModel = membraneModel;
 
+        this.simulationMethod = serviceProvider.GetRequiredKeyedService<ISimulation>(state.MembraneModel);
+
         InitializeOutputFiles(state);
 
         // Main loop: corresponds to label 3333 (start of run)
@@ -84,14 +93,13 @@ public class SennRunner
 
                 if (inputParams == null)
                 {
-                    // EOF reached (label 5000)
-                    Console.WriteLine("HIT EOF ON INPUT");
+                    Console.WriteLine("HIT EOF ON INPUT"); // EOF reached (label 5000)
                     break;
                 }
 
                 ApplyInputParamsToState(state, inputParams);
 
-                RunNextAction? nextAction = ExecuteSimulationStep(state);
+                RunNextAction? nextAction = this.simulationMethod.ExecuteSimulationStep(state);
                 if (nextAction == null)
                 {
                     break; // Error occurred
@@ -124,15 +132,11 @@ public class SennRunner
         CleanupSimulationState(state);
     }
 
-    /// <summary>
-    /// Initialize simulation state and open output files
-    /// </summary>
     private SennState InitializeSimulationState()
     {
         var state = new SennState();
 
-        // IRUN = 0 ! run counter
-        state.IRUN = 0;
+        state.IRUN = 0; // IRUN = 0 ! run counter
 
         return state;
     }
@@ -169,8 +173,10 @@ public class SennRunner
 
         ValidateSettingsAndPrintHeader(state);
         ConfigureProbeAndWaveform(state);
+
         ImportExternalArrays(state);
         ImportXYForWaveform13(state);
+
         PostWaveformSetup(state);
         ConfigureWaveformParameters(state);
 
@@ -371,245 +377,6 @@ public class SennRunner
         state.FOURPI = 4.0 * state.PI;
         state.PID180 = state.PI / 180.0;
     }
-
-
-
-
-    public bool ReadInputParameters(SennState state)
-    {
-        var reader = state.InParamReader
-                     ?? throw new InvalidOperationException("InParamReader is not initialized.");
-
-        string? line;
-        bool headerRead = false;
-        string? currentSection = null;  // "FIBER", "STIMULUS", "CONTROL"
-
-        // Use invariant culture for parsing doubles with '.' decimal
-        var ci = CultureInfo.InvariantCulture;
-
-        // Fortran: READ(7,6666,END=5000)MES2
-        // Read the descriptor line (20A4 format = 80 characters, stored in MES2 array)
-        line = reader.ReadLine();
-        if (line == null)
-        {
-            return false; // EOF reached (label 5000)
-        }
-        // Store descriptor (first line is the run descriptor)
-        state.Descriptor = line.Trim();
-        headerRead = true;
-
-        while ((line = reader.ReadLine()) != null)
-        {
-            line = line.Trim();
-            if (string.IsNullOrEmpty(line))
-                continue;
-
-            // Section markers: &FIBER, &STIMULUS, &CONTROL, &END
-            if (line.StartsWith("&", StringComparison.OrdinalIgnoreCase))
-            {
-                var upper = line.ToUpperInvariant();
-                if (upper.StartsWith("&FIBER"))
-                {
-                    currentSection = "FIBER";
-                }
-                else if (upper.StartsWith("&STIMULUS"))
-                {
-                    currentSection = "STIMULUS";
-                }
-                else if (upper.StartsWith("&CONTROL"))
-                {
-                    currentSection = "CONTROL";
-                }
-                else if (upper.StartsWith("&END"))
-                {
-                    currentSection = null;
-                }
-
-                continue;
-            }
-
-            // If we're inside a section, parse assignments like: NAME=VALUE,
-            if (currentSection != null)
-            {
-                var assignments = line.Split(',');
-                foreach (var raw in assignments)
-                {
-                    var part = raw.Trim();
-                    if (string.IsNullOrEmpty(part))
-                        continue;
-
-                    var kv = part.Split('=');
-                    if (kv.Length != 2)
-                        continue;
-
-                    var name = kv[0].Trim().ToUpperInvariant();
-                    var value = kv[1].Trim();
-
-                    switch (currentSection)
-                    {
-                        case "FIBER":
-                            ParseFiberField(state, name, value, ci);
-                            break;
-                        case "STIMULUS":
-                            ParseStimulusField(state, name, value, ci);
-                            break;
-                        case "CONTROL":
-                            ParseControlField(state, name, value, ci);
-                            break;
-                    }
-                }
-            }
-        }
-
-        return true; // Successfully read parameters
-    }
-
-    private void ParseFiberField(SennState state, string name, string value, IFormatProvider ci)
-    {
-        switch (name)
-        {
-            case "NNODES":
-                state.NNODES = (short)int.Parse(value, ci);
-                break;
-            case "NLIN1":
-                state.NLIN1 = (short)int.Parse(value, ci);
-                break;
-            case "NLIN2":
-                state.NLIN2 = (short)int.Parse(value, ci);
-                break;
-            case "NODE1":
-                state.NODE1 = (short)int.Parse(value, ci);
-                break;
-            case "DIAM":
-                state.DIAM = double.Parse(value, ci);
-                break;
-            case "GAP":
-                state.GAP = double.Parse(value, ci);
-                break;
-            case "CM":
-                state.CM = double.Parse(value, ci);
-                break;
-            case "GM":
-                state.GM = double.Parse(value, ci);
-                break;
-            case "RHOI":
-                state.RHOI = double.Parse(value, ci);
-                break;
-            case "RHOE":
-                state.RHOE = double.Parse(value, ci);
-                break;
-        }
-    }
-
-    private void ParseStimulusField(SennState state, string name, string value, IFormatProvider ci)
-    {
-        switch (name)
-        {
-            case "XC":
-                state.XC = double.Parse(value, ci);
-                break;
-            case "YC":
-                state.YC = double.Parse(value, ci);
-                break;
-            case "XA":
-                state.XA = double.Parse(value, ci);
-                break;
-            case "YA":
-                state.YA = double.Parse(value, ci);
-                break;
-            case "WIREL":
-                state.WIREL = double.Parse(value, ci);
-                break;
-            case "IWAVE":
-                state.IWAVE = (short)int.Parse(value, ci);
-                break;
-            case "UIO":
-                state.UIO = double.Parse(value, ci);
-                break;
-            case "XPD":
-                state.XPD = double.Parse(value, ci);
-                break;
-            case "UIO2":
-                state.UIO2 = double.Parse(value, ci);
-                break;
-            case "XPD2":
-                state.XPD2 = double.Parse(value, ci);
-                break;
-            case "DELAY":
-                state.DELAY = double.Parse(value, ci);
-                break;
-            case "FREQ":
-                state.FREQ = double.Parse(value, ci);
-                break;
-            case "PHASE":
-                state.PHASE = double.Parse(value, ci);
-                break;
-            case "FREQ2":
-                state.FREQ2 = double.Parse(value, ci);
-                break;
-            case "PHASE2":
-                state.PHASE2 = double.Parse(value, ci);
-                break;
-            case "AMP2":
-                state.AMP2 = double.Parse(value, ci);
-                break;
-            case "NSINES":
-                state.NSINES = (short)int.Parse(value, ci);
-                break;
-            case "DCOFF":
-                state.DCOFF = double.Parse(value, ci);
-                break;
-            case "TAUS":
-                state.TAUS = double.Parse(value, ci);
-                break;
-            case "VREF":
-                state.VREF = double.Parse(value, ci);
-                break;
-            case "NP":
-                state.NP = (short)int.Parse(value, ci);
-                break;
-            case "FS":
-                state.FS = (short)int.Parse(value, ci);
-                break;
-            case "S":
-                state.S = (short)int.Parse(value, ci);
-                break;
-            case "NTRP":
-                state.NTRP = int.Parse(value, ci);
-                break;
-        }
-    }
-
-    private void ParseControlField(SennState state, string name, string value, IFormatProvider ci)
-    {
-        switch (name)
-        {
-            case "ITHR":
-                state.ITHR = (short)int.Parse(value, ci);
-                break;
-            case "VTH":
-                state.VTH = double.Parse(value, ci);
-                break;
-            case "NTHNODE":
-                state.NTHNODE = (short)int.Parse(value, ci);
-                break;
-            case "DELT":
-                state.DELT = double.Parse(value, ci);
-                break;
-            case "DELT2M":
-                state.DELT2M = double.Parse(value, ci);
-                break;
-            case "FINAL":
-                state.FINAL = double.Parse(value, ci);
-                break;
-            case "IPRNT":
-                state.IPRNT = (short)int.Parse(value, ci);
-                break;
-                // TT, DELT2, pltn keep their defaults (set elsewhere)
-        }
-    }
-
-
 
     private void ValidateSettingsAndPrintHeader(SennState state)
     {

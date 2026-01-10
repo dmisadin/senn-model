@@ -29,8 +29,11 @@ internal sealed class Program
 
         services.AddSingleton<SennRunner>();
         services.AddScoped<FileImporter>();
+        services.AddScoped<FileExporter>();
         services.AddKeyedTransient<ISimulation, FrankenhaeuserHuxleySimulation>(MembraneModel.FrankenhaeuserHuxley);
         services.AddKeyedTransient<ISimulation, HodgkinHuxleySimulation>(MembraneModel.HodgkinHuxley);
+        services.AddKeyedTransient<ISimulation, ChiuRitchieRogartStaggSimulation>(MembraneModel.ChiuRitchieRogartStagg);
+        services.AddKeyedTransient<ISimulation, McIntyreRichardsonGrillSimulation>(MembraneModel.McIntyreRichardsonGrill);
 
         // Register ViewModels
         services.AddSingleton<MainWindowViewModel>();
