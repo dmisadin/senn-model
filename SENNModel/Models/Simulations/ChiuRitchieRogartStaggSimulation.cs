@@ -1,10 +1,15 @@
 ﻿using SENNModel.Models.Enums;
+using SENNModel.Models.IO;
 using System;
 
 namespace SENNModel.Models.Simulations;
 
 public class ChiuRitchieRogartStaggSimulation :  BaseSimulation, ISimulation
 {
+    public ChiuRitchieRogartStaggSimulation(FileExporter fileExporter) : base(fileExporter)
+    {
+    }
+
     public RunNextAction? ExecuteSimulationStep(SennState state)
     {
         throw new System.NotImplementedException();
