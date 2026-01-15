@@ -73,7 +73,7 @@ public class SennRunner
     /// <summary>
     /// Run simulation with parameters from file (original behavior)
     /// </summary>
-    public void Run(MembraneModel membraneModel, DirectoryInfo? outputDir)
+    public void Run(MembraneModel membraneModel, DirectoryInfo? outputDir, bool isNameTimestamped = true)
     {
         var state = InitializeSimulationState();
         var resolvedOutputDir = outputDir ?? new DirectoryInfo(AppContext.BaseDirectory);
@@ -85,7 +85,7 @@ public class SennRunner
 
         this.simulationMethod = serviceProvider.GetRequiredKeyedService<ISimulation>(state.MembraneModel);
 
-        InitializeOutputFiles(state, resolvedOutputDir);
+        InitializeOutputFiles(state, resolvedOutputDir, isNameTimestamped);
 
         // Main loop: corresponds to label 3333 (start of run)
         // Fortran: GOTO 3333 can restart from the beginning
@@ -147,17 +147,24 @@ public class SennRunner
         return state;
     }
 
-    private void InitializeOutputFiles(SennState state, DirectoryInfo outputDir)
+    private void InitializeOutputFiles(SennState state, DirectoryInfo outputDir, bool isNameTimestamped = true)
     {
         if (!outputDir.Exists)
             outputDir.Create();
 
-        string membraneModel = state.MembraneModel.GetDescription();
-        string startedAt = state.StartedAt.ToString("yyyy-MM-dd-HH-mm-ss.ss");
+        string dataOutFileName = "data.out";
+        string out17FileName = "plot_17.txt";
+        string out30FileName = "plot_30.txt";
 
-        string dataOutFileName = $"data_{startedAt}_{membraneModel}.out";
-        string out17FileName = $"plot_{startedAt}_17_{membraneModel}.txt";
-        string out30FileName = $"plot_{startedAt}_30_{membraneModel}.txt";
+        if (isNameTimestamped)
+        {
+            string membraneModel = state.MembraneModel.GetDescription();
+            string startedAt = state.StartedAt.ToString("yyyy-MM-dd-HH-mm-ss.ss");
+
+            dataOutFileName = $"data_{startedAt}_{membraneModel}.out";
+            out17FileName = $"plot_{startedAt}_17_{membraneModel}.txt";
+            out30FileName = $"plot_{startedAt}_30_{membraneModel}.txt";
+        }
 
         string dataOutPath = Path.Combine(outputDir.FullName, dataOutFileName);
         string out17Path = Path.Combine(outputDir.FullName, out17FileName);

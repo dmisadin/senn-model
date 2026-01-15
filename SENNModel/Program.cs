@@ -51,19 +51,29 @@ internal sealed class Program
             Required = false
         };
 
+        var uniqueOpt = new Option<bool>(
+            name: "unique",
+            aliases: ["--unique", "-u"])
+        {
+            Description = "Output files use timestamps to ensure unique naming.",
+            DefaultValueFactory = _ => false
+        };
+
         var root = new RootCommand();
         root.Options.Add(modelOpt);
         root.Options.Add(outputDirOpt);
+        root.Options.Add(uniqueOpt);
 
         root.SetAction((parseResult, ct) =>
         {
             var model = parseResult.GetValue(modelOpt);
             var outputDir = parseResult.GetValue(outputDirOpt);
+            var uniqueDir = parseResult.GetValue(uniqueOpt);
 
             using var scope = Services.CreateScope();
             var runner = scope.ServiceProvider.GetRequiredService<SennRunner>();
 
-            runner.Run(model, outputDir);
+            runner.Run(model, outputDir, uniqueDir);
 
             Console.WriteLine("Headless run completed.");
             return Task.FromResult(0);
