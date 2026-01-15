@@ -31,9 +31,10 @@ public class SennRunner
         var state = InitializeSimulationState();
 
         this.simulationMethod = serviceProvider.GetRequiredKeyedService<ISimulation>(state.MembraneModel);
+        var resolvedOutputDir = new DirectoryInfo(AppContext.BaseDirectory);
 
         ApplyInputParamsToState(state, inputParams);
-        InitializeOutputFiles(state);
+        InitializeOutputFiles(state, resolvedOutputDir);
         // Main loop: corresponds to label 3333 (start of run)
         // Fortran: GOTO 3333 can restart from the beginning
         while (true)
@@ -64,12 +65,18 @@ public class SennRunner
         CleanupSimulationState(state);
     }
 
+    public void Run(MembraneModel membraneModel)
+    {
+        Run(membraneModel, null);
+    }
+
     /// <summary>
     /// Run simulation with parameters from file (original behavior)
     /// </summary>
-    public void Run(MembraneModel membraneModel = MembraneModel.FrankenhaeuserHuxley)
+    public void Run(MembraneModel membraneModel, DirectoryInfo? outputDir)
     {
         var state = InitializeSimulationState();
+        var resolvedOutputDir = outputDir ?? new DirectoryInfo(AppContext.BaseDirectory);
 
         // OPEN(UNIT=7,FILE='inparam.txt',STATUS='OLD',ACCESS='SEQUENTIAL')
         // => open existing file for reading
@@ -78,7 +85,7 @@ public class SennRunner
 
         this.simulationMethod = serviceProvider.GetRequiredKeyedService<ISimulation>(state.MembraneModel);
 
-        InitializeOutputFiles(state);
+        InitializeOutputFiles(state, resolvedOutputDir);
 
         // Main loop: corresponds to label 3333 (start of run)
         // Fortran: GOTO 3333 can restart from the beginning
@@ -140,8 +147,11 @@ public class SennRunner
         return state;
     }
 
-    private void InitializeOutputFiles(SennState state)
+    private void InitializeOutputFiles(SennState state, DirectoryInfo outputDir)
     {
+        if (!outputDir.Exists)
+            outputDir.Create();
+
         string membraneModel = state.MembraneModel.GetDescription();
         string startedAt = state.StartedAt.ToString("yyyy-MM-dd-HH-mm-ss.ss");
 
@@ -149,13 +159,17 @@ public class SennRunner
         string out17FileName = $"plot_{startedAt}_17_{membraneModel}.txt";
         string out30FileName = $"plot_{startedAt}_30_{membraneModel}.txt";
 
-        state.DataOutWriter = new StreamWriter(dataOutFileName); // data.out
-        state.Out17 = new StreamWriter(out17FileName); // fort.17
-        state.Out30 = new StreamWriter(out30FileName); // fort.30
+        string dataOutPath = Path.Combine(outputDir.FullName, dataOutFileName);
+        string out17Path = Path.Combine(outputDir.FullName, out17FileName);
+        string out30Path = Path.Combine(outputDir.FullName, out30FileName);
 
-        state.DataOutFileName = dataOutFileName;
-        state.Out17FileName = out17FileName;
-        state.Out30FileName = out30FileName;
+        state.DataOutWriter = new StreamWriter(dataOutPath);
+        state.Out17 = new StreamWriter(out17Path);
+        state.Out30 = new StreamWriter(out30Path);
+
+        state.DataOutFileName = dataOutPath;
+        state.Out17FileName = out17Path;
+        state.Out30FileName = out30Path;
     }
 
     /// <summary>
