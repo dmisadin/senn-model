@@ -6,6 +6,12 @@ plot_30.txt
 *.out
 data_out.txt
 
+# input/output files (like IWAVE=13)
+XYfile.txt
+XYfile.xls
+XYIN
+XYINTERP
+
 # executable files from C# and Fortran
 *.exe
 *.dll
