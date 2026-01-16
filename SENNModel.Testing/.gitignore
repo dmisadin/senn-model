@@ -1,0 +1,21 @@
+# each runs output files
+fort.17
+fort.30
+plot_17.txt
+plot_30.txt
+*.out
+data_out.txt
+
+# executable files from C# and Fortran
+*.exe
+*.dll
+
+# generated Excel files from C#
+*.xlsx
+
+# generated outputs from Python script
+*_stderr.txt
+*_stdout.txt
+
+# only working directory inparam.txt
+/inparam.txt

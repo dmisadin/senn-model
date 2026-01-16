@@ -8,11 +8,11 @@ from dataclasses import dataclass
 from pathlib import Path
 
 
-FORTRAN_DEFAULT = "SENN.exe"
+FORTRAN_DEFAULT = "SENN_recompiled.exe"
 CSHARP_DEFAULT = "SENNModel.exe"
 
-FORTRAN_OUTPUTS = ["fort.17", "fort.30"]
-CSHARP_OUTPUTS = ["plot_17.txt", "plot_30.txt"]
+FORTRAN_OUTPUTS = ["fort.17", "fort.30", "data.out"]
+CSHARP_OUTPUTS = ["plot_17.txt", "plot_30.txt", "data_out.txt"]
 
 
 @dataclass(frozen=True)
@@ -109,19 +109,14 @@ def run_csharp(exe: Path, workdir: Path, output_dir: Path, run_name: str, timeou
         )
 
 
-def run_fortran_with_output_detection(
+def run_fortran(
     exe: Path,
     workdir: Path,
     run_name: str,
-    *,
-    poll_interval: float,
-    stable_seconds: float,
-    max_wait_seconds: float,
-    graceful_terminate_seconds: float,
+    timeout: int | None,
 ) -> None:
     """
-    Start Fortran exe; if it exits, great.
-    If it does not exit, decide 'done' when fort.* outputs stabilize, then terminate.
+    Run Fortran exe and wait for it to exit. Capture stdout/stderr to per-run files.
     """
     if not exe.exists():
         raise RuntimeError(f"Missing Fortran executable: {exe}")
@@ -136,51 +131,25 @@ def run_fortran_with_output_detection(
             p.unlink()
 
     with stdout_path.open("wb") as out, stderr_path.open("wb") as err:
-        proc = subprocess.Popen(
+        proc = subprocess.run(
             [str(exe)],
             cwd=str(workdir),
             stdout=out,
             stderr=err,
+            timeout=timeout,
+            check=False,
         )
 
-        # First: try waiting a little bit for natural exit while still monitoring outputs
-        # We'll use output stabilization as the primary completion signal.
-        try:
-            wait_for_outputs_stable(
-                workdir,
-                FORTRAN_OUTPUTS,
-                poll_interval=poll_interval,
-                stable_seconds=stable_seconds,
-                max_wait_seconds=max_wait_seconds,
-            )
-        except Exception:
-            # If something went wrong, also check if process already exited
-            ret = proc.poll()
-            if ret is not None and ret != 0:
-                raise RuntimeError(
-                    f"Fortran process exited early with code {ret}. "
-                    f"See {stdout_path.name} / {stderr_path.name}"
-                )
-            raise
+    if proc.returncode != 0:
+        raise RuntimeError(
+            f"Fortran run failed with exit code {proc.returncode}. "
+            f"See {stdout_path.name} / {stderr_path.name}"
+        )
 
-        # At this point, outputs are stable -> consider the run finished.
-        # If process is still running, terminate it.
-        ret = proc.poll()
-        if ret is None:
-            proc.terminate()
-            try:
-                proc.wait(timeout=graceful_terminate_seconds)
-            except subprocess.TimeoutExpired:
-                proc.kill()
-                proc.wait()
-
-        else:
-            # Process exited; non-zero is a failure
-            if ret != 0:
-                raise RuntimeError(
-                    f"Fortran run failed with exit code {ret}. "
-                    f"See {stdout_path.name} / {stderr_path.name}"
-                )
+    # Optional: ensure outputs exist before continuing
+    missing = [fn for fn in FORTRAN_OUTPUTS if not (workdir / fn).exists()]
+    if missing:
+        raise RuntimeError(f"Fortran finished but outputs are missing: {missing}")
 
 
 def copy_files(src_dir: Path, dst_dir: Path, filenames: list[str]) -> None:
@@ -208,6 +177,7 @@ def main() -> int:
 
     # C# timeout
     ap.add_argument("--csharp-timeout", type=int, default=0, help="Timeout seconds for C# (0 = no timeout)")
+    ap.add_argument("--fortran-timeout", type=int, default=0, help="Timeout seconds for Fortran (0 = no timeout)")
 
     ap.add_argument("--continue-on-error", action="store_true", help="Continue after errors (default: stop)")
     args = ap.parse_args()
@@ -216,7 +186,7 @@ def main() -> int:
 
     fortran_exe = testing_dir / args.fortran_exe
     csharp_exe = testing_dir / args.csharp_exe
-    testing_inparams = testing_dir / "inparams.txt"
+    testing_inparams = testing_dir / "inparam.txt"
 
     csharp_timeout = None if args.csharp_timeout == 0 else args.csharp_timeout
 
@@ -229,7 +199,7 @@ def main() -> int:
     for n in range(args.start, args.end + 1):
         run_name = f"run_{n}"
         run_dir = testing_dir / run_name
-        run_inparams = run_dir / "inparams.txt"
+        run_inparams = run_dir / "inparam.txt"
 
         if run_dir == testing_dir:
             raise RuntimeError("Refusing to use testing directory as run directory")
@@ -244,14 +214,11 @@ def main() -> int:
             shutil.copy2(run_inparams, testing_inparams)
 
             # --- Fortran ---
-            run_fortran_with_output_detection(
+            run_fortran(
                 fortran_exe,
                 testing_dir,
                 run_name,
-                poll_interval=args.poll_interval,
-                stable_seconds=args.stable_seconds,
-                max_wait_seconds=args.fortran_max_wait,
-                graceful_terminate_seconds=args.fortran_terminate_wait,
+                timeout=args.fortran_timeout if args.fortran_timeout != 0 else None,
             )
             # Copy fort.* into results/run_N
             copy_files(testing_dir, run_dir, FORTRAN_OUTPUTS)
@@ -263,7 +230,6 @@ def main() -> int:
                 run_name,
                 timeout=csharp_timeout
             )
-
 
             print(f"[{run_name}] done.")
 
