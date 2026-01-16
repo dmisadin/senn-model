@@ -8,8 +8,8 @@ from pathlib import Path
 import matplotlib.pyplot as plt
 
 
-FORTRAN_DEFAULT = "SENN_recompiled.exe"
-CSHARP_DEFAULT = "SENNModel.exe"
+FORTRAN_DEFAULT = "SENN_fortran.exe"
+CSHARP_DEFAULT = "SENN_csharp.exe"
 
 FORTRAN_OUTPUTS = ["fort.17", "fort.30", "data.out"]
 CSHARP_OUTPUTS = ["plot_17.txt", "plot_30.txt", "data_out.txt"]
