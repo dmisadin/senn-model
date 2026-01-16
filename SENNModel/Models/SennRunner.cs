@@ -152,7 +152,7 @@ public class SennRunner
         if (!outputDir.Exists)
             outputDir.Create();
 
-        string dataOutFileName = "data.out";
+        string dataOutFileName = "data_out.txt";
         string out17FileName = "plot_17.txt";
         string out30FileName = "plot_30.txt";
 
