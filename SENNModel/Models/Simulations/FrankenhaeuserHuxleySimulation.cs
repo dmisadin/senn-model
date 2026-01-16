@@ -1565,8 +1565,8 @@ public class FrankenhaeuserHuxleySimulation : BaseSimulation, ISimulation
         w?.WriteLine(banner);
 
         // Sentinel markers to units 17 and 30 (if used)
-        state.Out17?.WriteLine("5000 5000");
-        state.Out30?.WriteLine("5000 5000");
+        //state.Out17?.WriteLine("5000 5000");
+        //state.Out30?.WriteLine("5000 5000");
 
         // If threshold seeking (ITHR = 1): start a completely new run (like GOTO 3333)
         if (state.ITHR == 1)
