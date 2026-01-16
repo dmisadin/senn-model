@@ -1,0 +1,15 @@
+13.3.2 Single Sinewave, IWAVE = 2
+
+Table 13.4 Input Parameters for the Sinusoidal Pulse Described in Section 13.3.2
+
+Changes:
+ XC=100.0,
+ YC=100.0,
+ XA=0.0,
+ YA=1.0,
+ UIO=64.0,
+ XPD=0.6,
+ PHASE=90.0,
+ S=0,
+
+ FINAL=2.0,

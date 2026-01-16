@@ -1,0 +1,20 @@
+13.3.11 Cosine Amplitude Modulation, Two Sinusoids, IWAVE = 11
+
+Table 13.14 Input Parameters for the Amplitude-Modulated Pulse Described in Section 13.3.11
+
+Changes compared to run_1:
+ AMP. MOD.
+
+ NNODES=101,
+ NLIN2=101,
+ NODE1=47,
+ DIAM=0.0010,
+ IWAVE=11,
+ UIO=1024.0,
+ XPD=0.15,
+ FREQ=200.0,
+ FREQ2=16.0,
+ AMP2=0.7,
+ 
+ DELT= 0.00005,
+ FINAL=2.0,

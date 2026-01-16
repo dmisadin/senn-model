@@ -1,0 +1,16 @@
+13.4.3 Sampled Temporal Waveform, IWAVE = 13
+
+Table 13.20 Input Parameters for the Sampled Data Described in Section 13.4.3
+
+Changes compared to run_1:
+ External Data
+
+ IWAVE=13,
+ UIO=0.015625,
+ XPD=0.18,
+
+ NSINES=10,
+
+ NTRP=2,
+ 
+ FINAL=2.0,
