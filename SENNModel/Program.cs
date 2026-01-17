@@ -7,6 +7,10 @@ using SENNModel.Models.Simulations;
 using SENNModel.ViewModels;
 using SENNModel.Views;
 using System;
+using System.CommandLine;
+using System.IO;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace SENNModel;
 
@@ -15,13 +19,70 @@ internal sealed class Program
     public static IServiceProvider Services { get; private set; } = default!;
 
     [STAThread]
-    public static void Main(string[] args)
+    public static async Task<int> Main(string[] args)
     {
         Services = ConfigureServices();
 
-        BuildAvaloniaApp()
-            .StartWithClassicDesktopLifetime(args);
+        // Headless path: run SennRunner and exit
+        if (args.Any(a => a.Equals("--headless", StringComparison.OrdinalIgnoreCase)))
+        {
+            return await RunHeadlessFromArgs(args);
+        }
+
+        // GUI path
+        BuildAvaloniaApp().StartWithClassicDesktopLifetime(args);
+        return 0;
     }
+
+    private static async Task<int> RunHeadlessFromArgs(string[] args)
+    {
+        var modelOpt = new Option<MembraneModel>(
+            name: "model",
+            aliases: ["--model", "-m"])
+        {
+            DefaultValueFactory = _ => MembraneModel.FrankenhaeuserHuxley
+        };
+
+        var outputDirOpt = new Option<DirectoryInfo>(
+            name: "output-dir",
+            aliases: ["--output-dir", "-o"])
+        {
+            Description = "Directory to write results into.",
+            Required = false
+        };
+
+        var uniqueOpt = new Option<bool>(
+            name: "unique",
+            aliases: ["--unique", "-u"])
+        {
+            Description = "Output files use timestamps to ensure unique naming.",
+            DefaultValueFactory = _ => false
+        };
+
+        var root = new RootCommand();
+        root.Options.Add(modelOpt);
+        root.Options.Add(outputDirOpt);
+        root.Options.Add(uniqueOpt);
+
+        root.SetAction((parseResult, ct) =>
+        {
+            var model = parseResult.GetValue(modelOpt);
+            var outputDir = parseResult.GetValue(outputDirOpt);
+            var uniqueDir = parseResult.GetValue(uniqueOpt);
+
+            using var scope = Services.CreateScope();
+            var runner = scope.ServiceProvider.GetRequiredService<SennRunner>();
+
+            runner.Run(model, outputDir, uniqueDir);
+
+            Console.WriteLine("Headless run completed.");
+            return Task.FromResult(0);
+        });
+
+        return await root.Parse(args.Where(a => !a.Equals("--headless", StringComparison.OrdinalIgnoreCase)).ToArray())
+                        .InvokeAsync();
+    }
+
 
     private static IServiceProvider ConfigureServices()
     {
@@ -30,20 +91,15 @@ internal sealed class Program
         services.AddSingleton<SennRunner>();
         services.AddScoped<FileImporter>();
         services.AddScoped<FileExporter>();
+
         services.AddKeyedTransient<ISimulation, FrankenhaeuserHuxleySimulation>(MembraneModel.FrankenhaeuserHuxley);
         services.AddKeyedTransient<ISimulation, HodgkinHuxleySimulation>(MembraneModel.HodgkinHuxley);
         services.AddKeyedTransient<ISimulation, ChiuRitchieRogartStaggSimulation>(MembraneModel.ChiuRitchieRogartStagg);
         services.AddKeyedTransient<ISimulation, McIntyreRichardsonGrillSimulation>(MembraneModel.McIntyreRichardsonGrill);
 
-        // Register ViewModels
         services.AddSingleton<MainWindowViewModel>();
-
-        // Register Views / Windows
         services.AddSingleton<MainWindow>(sp =>
-            new MainWindow
-            {
-                DataContext = sp.GetRequiredService<MainWindowViewModel>()
-            });
+            new MainWindow { DataContext = sp.GetRequiredService<MainWindowViewModel>() });
 
         return services.BuildServiceProvider();
     }
@@ -53,4 +109,5 @@ internal sealed class Program
             .UsePlatformDetect()
             .WithInterFont()
             .LogToTrace();
+
 }

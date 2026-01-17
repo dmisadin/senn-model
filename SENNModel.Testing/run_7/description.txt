@@ -1,0 +1,21 @@
+13.3.5 Sinewave * Exponential, IWAVE = 5
+
+Table 13.8 Input Parameters for the Sine*Exponential Pulse Described in Section 13.3.5
+
+Changes:
+ SINE*EXP
+
+ XC=100.0,
+ YC=100.0,
+ XA=0.0,
+ YA=0.2,
+ IWAVE=5,
+ UIO=8.0,
+ XPD=0.45,
+ FREQ=20.0,
+ PHASE=90.0,
+ TAUS=0.1,
+ S=0,
+
+ DELT= 0.0008,
+ FINAL=2.0,

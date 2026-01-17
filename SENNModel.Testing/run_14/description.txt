@@ -1,0 +1,19 @@
+14.3 Test Case: High-Frequency Sinewave
+14.3.1 Parameters and Symptoms
+
+Table 14.1 Input Parameters for the Sinusoidal Pulse Described in Section 14.3.1
+
+Changes compared to run_1: 
+ 
+ NNODES=11,
+ NLIN2=11,
+ NODE1=6,
+ 
+ YC=0.2,
+ UIO=15.0,
+ XPD=0.02,
+ FREQ=50.0,
+ S=0,
+ 
+ DELT2M=5.0,
+ FINAL=2.0,

@@ -1,0 +1,20 @@
+13.4.4 Sampled Electric Field Contours, IWAVE = 1 and FS = 2
+13.4.4.1 Field Reference Case
+
+Table 13.22 Input Parameters for the Reference Case Described in Section 13.4.4.1 for IWAVE  1 and FS  1
+
+Changes compared to run_1: 
+ MONOPHASIC
+ 
+ NNODES=13,
+ NLIN2=13,
+ NODE1=1,
+ IWAVE=1,
+ UIO=0.125,
+ NSINES=10,
+ FS=1,
+ NTRP=2,
+ 
+ DELT= 0.004,
+ DELT2M=1.0,
+ IPRNT=400,

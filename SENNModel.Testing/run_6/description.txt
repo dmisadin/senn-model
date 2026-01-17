@@ -1,0 +1,17 @@
+13.3.4 Exponential, IWAVE = 4
+
+Table 13.6 Input Parameters for the Exponential Pulse Described in Section 13.3.4
+
+Changes:
+ EXPONENTIAL
+
+ YC=0.2,
+ IWAVE=4,
+ UIO=1.0,
+ XPD=0.45,
+ PHASE=90.0,
+ TAUS=0.1,
+ S=0, 
+
+ DELT= 0.0008,
+ FINAL=2.0,

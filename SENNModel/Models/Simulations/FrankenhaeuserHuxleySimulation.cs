@@ -1565,8 +1565,8 @@ public class FrankenhaeuserHuxleySimulation : BaseSimulation, ISimulation
         w?.WriteLine(banner);
 
         // Sentinel markers to units 17 and 30 (if used)
-        state.Out17?.WriteLine("5000 5000");
-        state.Out30?.WriteLine("5000 5000");
+        //state.Out17?.WriteLine("5000 5000");
+        //state.Out30?.WriteLine("5000 5000");
 
         // If threshold seeking (ITHR = 1): start a completely new run (like GOTO 3333)
         if (state.ITHR == 1)
@@ -1721,6 +1721,7 @@ public class FrankenhaeuserHuxleySimulation : BaseSimulation, ISimulation
         }
     }
 
+
     private double SINEIN(double x, int i, SennState s)
     {
         return s.SINEIN2[i, 1] * Math.Sin(s.SINEIN2[i, 2] * x + s.SINEIN2[i, 3]);
@@ -1755,11 +1756,16 @@ public class FrankenhaeuserHuxleySimulation : BaseSimulation, ISimulation
         return false;
     }
 
+
     private bool IsInsideSecondaryPulse(double x, SennState s)
     {
         if (s.IWAVE != 6 && s.IWAVE != 8 && s.IWAVE != 9) return false;
 
-        for (int i = 1; i <= s.NP; i++)
+        // For IWAVE=6, the SECONDARY phases are stored at indices 2+ in PL/PT arrays.
+        // Index 1 is PRIMARY. Do NOT check index 1 for IWAVE=6.
+        int startIndex = (s.IWAVE == 6) ? 2 : 1;
+
+        for (int i = startIndex; i <= s.NP; i++)
             if (x >= s.PL[i] && x <= s.PT[i])
                 return true;
 
@@ -1769,15 +1775,17 @@ public class FrankenhaeuserHuxleySimulation : BaseSimulation, ISimulation
         return false;
     }
 
+
     private void ApplySecondaryEPT(double XMULT, double x, SennState s)
     {
         for (int i = 1; i <= s.NNODES; i++)
         {
             // Replace primary EPOT with UIO2 version during second phase
-            double ext = ComputeExternalPotentialAtNode(i, s.UIO2, XMULT, s);
+            double ext = ComputeExternalPotentialAtNode(i, s.UIO2, 1.0, s);
             s.EPT[i] = ext;
         }
     }
+
 
     private double ComputeExternalPotentialAtNode(int i, double scale, double XMULT, SennState s)
     {

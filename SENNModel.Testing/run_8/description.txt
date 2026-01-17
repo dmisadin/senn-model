@@ -1,0 +1,19 @@
+13.3.6 Monophasic and Biphasic Square-Wave Doublets, IWAVE = 6
+
+Table 13.10 Input Parameters for the Rectangular Doublet Described in Section 13.3.6
+
+Changes compared to run_1:
+ DOUBLET
+ IWAVE=6,
+ UIO=0.25,
+ XPD=0.1,
+ UIO2=-0.125,
+ XPD2=0.05,
+ DELAY=0.1,
+ FREQ=20.0,
+ PHASE=90.0,
+ TAUS=0.1,
+ FS=1,
+ S=0,
+
+ FINAL=2.0,

@@ -1,0 +1,12 @@
+13.3.1 Monophasic Square Pulse(s), IWAVE = 1
+
+Table 13.1 Input Parameters for the Monophasic Square Pulse Described in Section 13.3.1
+
+Changes:
+ MONOPHASIC
+
+ IWAVE=1,
+ XPD=0.1,
+ S=0,
+
+ FINAL=2.0,

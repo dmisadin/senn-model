@@ -1,0 +1,13 @@
+13.4.2 Sum of n Sinewaves, IWAVE = 12
+
+Table 13.16 Input Parameters for the Sum of Sinusoids Described in Section 13.4.2
+
+Changes compared to run_1:
+ N SINUSOIDS
+
+ IWAVE=12,
+ XPD=0.1,
+ NSINES=10,
+ S=0,
+ 
+ FINAL=2.0,
