@@ -4,6 +4,8 @@ This repository contains an implementation and validation of the **Spatially Ext
 
 The goal of this project is **not only to run the original SENN simulation**, but to **verify numerical equivalence between a modern C# implementation and the original legacy Fortran code** described in the reference literature.
 
+**WARNING**: The .NET implementation in this repository could have small deviations and could use more accurate algorithms. When plotting the results, there can be one iteration where the graph deviates from original Fortran implementation. For the rest, more accurate graphs, the result is around 1% different or less.
+
 ---
 
 ## Background
@@ -25,7 +27,7 @@ This repository contains three main components:
 
 1. **Original Fortran SENN simulation**
    - Compiled on Windows using GNU Fortran (gfortran) in legacy Fortran 77 mode.
-   - Serves as the reference implementation.
+   - Serves as the reference implementation without any GUI.
 
 2. **Modern C# (.NET) reimplementation**
    - A clean, maintainable version of the same mathematical model.
@@ -71,8 +73,6 @@ That document describes:
 
 This project exists to:
 
-- Preserve a historically important computational neuroscience model
-- Validate correctness when porting legacy scientific code
 - Enable modern experimentation using reliable, reproducible simulations
 - Provide a foundation for future numerical and biomedical research
 
@@ -81,7 +81,6 @@ This project exists to:
 ## Notes
 
 - The Fortran code follows legacy Fortran 77 rules and behavior.
-- Numerical differences between compilers are carefully analyzed.
 - All comparisons are performed using identical simulation parameters.
 
 This repository is intended for developers, researchers, and students who wish to understand, validate, or extend the SENN computational model using modern tools while remaining faithful to the original scientific work.
