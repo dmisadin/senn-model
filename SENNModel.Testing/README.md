@@ -51,10 +51,14 @@ Find the executable in `SENNModel\bin\Release\net8.0\win-x64\publish` directory.
 Python script expects these executables to be inside its working directory: `SENN_fortran.exe` (+ corresponding `.dll` files) and `SENN_csharp.exe`.
 
 ### 3.2. Run the Python script
-
-Run the `compare_runs.py` with command:
+Install the required packages:
 ```bash
-python compare_runs.py --start 1 --end 3
+pip install matplotlib
+```
+
+Run the `compare_runs.py` with command (example shows how to run through directories `run_1` to `run_5`):
+```bash
+python compare_runs.py --start 1 --end 5
 ```
 
 ### 3.3. Observe the results
