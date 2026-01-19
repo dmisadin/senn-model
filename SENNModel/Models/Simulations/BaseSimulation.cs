@@ -3,6 +3,10 @@ using System;
 
 namespace SENNModel.Models.Simulations;
 
+/// <summary>
+/// When implementing a simulation of the SENN model, derive from this base class.
+/// IMPORTANT: Extract methods from FrankenhaeuserHuxleySimulation.cs if they are common.
+/// </summary>
 public abstract class BaseSimulation
 {
     protected readonly FileExporter fileExporter;
@@ -171,7 +175,11 @@ public abstract class BaseSimulation
         }
     }
 
-
+    /// <summary>
+    /// USING A FOURTH ORDER RUNGE-KUTTA FORMULA WITH GILL MODIFICATION
+    /// TO SOLVE A SYSTEM OF FIRST ORDER ORDINARY DIFFERENTIAL EQUATIONS
+    /// WITH GIVEN INITIAL VALUES.
+    /// </summary>
     public void RKGS(SennState s, int nDim)
     {
         // Aliases for convenience
@@ -523,5 +531,14 @@ public abstract class BaseSimulation
     }
 
     protected abstract void OutputStep(double x, SennState s, int iHLF, int nDim);
+
+    /// <summary>
+    /// CALCULATION OF DERIVATIVES
+    /// PROGRAM MODIFIED FROM THE ORIGINAL PROGRAM WRITTEN BY McNEAL(1976).
+    /// THE SUBROUTINE HAS BEEN FURTHER MODIFIED AS FOLLOWS:
+    /// LARGE EXP TEST REPLACED BY 0/0 TEST L'HOPITALS RULE
+    /// CHANGED DEFN OF END POINTS  25 MAR 85
+    /// FS SWITCH ADDED 3/17/87
+    /// </summary>
     protected abstract void FCT(double x, SennState s);
 }

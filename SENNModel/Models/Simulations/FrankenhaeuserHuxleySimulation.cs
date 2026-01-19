@@ -548,8 +548,15 @@ public class FrankenhaeuserHuxleySimulation : BaseSimulation, ISimulation
     /// <summary>
     /// C# placeholder for the Fortran INTERP subroutine:
     ///   CALL INTERP(XIN,YIN,DELTIN,LENIN,NTRP,XCAL,YCAL,YINTERP,DELTOT,LENOT)
-    /// When you provide the Fortran INTERP code, we can translate the
-    /// actual interpolation logic here.
+    ///   
+    /// TO LINEARLY INTERPOLATE INPUT ARRAY OF (X,Y) POINTS, FOR MODE
+    /// IWAVE = 13.X IS TIME, Y IS CURRENT.XIN AND YIN HAVE THE INPUT
+    /// VALUES, XCAL AND YCAL HAVE THE CALCULATED INTERPOLATED VALUES ONLY.
+    /// ARRAY YINTERP HAS Y OUTPUT ONLY. IN THIS IMPLEMENTATION, SENN
+    /// MEASURES X SPACING ONCE, AND CALCULATES RELATIVE X VALUES IN
+    /// SUBROUTINE RKGS. (FOR REFERENCE, OUTPUT FILE XYINTERP HAS THE FULL
+    /// TWO-DIMENSIONAL INTERPOLATED ARRAY, WITH RELATIVE X VALUES, AS
+    /// FORMED BY THIS SUBROUTINE.)
     /// </summary>
     private void Interp(SennState state)
     {
